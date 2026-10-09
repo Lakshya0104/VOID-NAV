@@ -1,0 +1,387 @@
+<title>VOID-NAV Wiring Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one readable column; the wiring map breaks out wide and scrolls sideways on phones. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --fg: #0f1a2a; --muted: #56637a; --line: #d8dee8;
+  --accent: #ff6b35; --accent-ink: #b8430f; --ok: #13897d; --warn-bg: #fff1e8; --warn-line: #ffc7a8;
+  --board: #1d2b45; --board-ink: #e8eef8; --module: #2b5f4f; --module-ink: #e6f4ee;
+  --display: "Archivo", "Arial Narrow", Arial, sans-serif;
+  --body: "Atkinson Hyperlegible", Verdana, Arial, sans-serif;
+  --mono: "JetBrains Mono", "Courier New", monospace;
+  /* wire colours: the same in both themes, picked to read on light and dark */
+  --w-3v3: #e23b4e; --w-gnd: #6b7a90; --w-sck: #d39b00; --w-miso: #3a7bea; --w-mosi: #2ea365;
+  --w-nssa: #f06a1d; --w-rsta: #9a6bd8; --w-nssb: #d14fb1; --w-rstb: #a8743a; --w-led1: #ff8c1a; --w-led2: #19b5a5; --w-btn: #8aa021;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1320; --surface: #142036; --fg: #eef2f8; --muted: #9aa7bd; --line: #26354f;
+  --accent: #ff7a47; --accent-ink: #ffa27a; --ok: #3fd0bf; --warn-bg: #2a1a12; --warn-line: #6b3a20;
+  --board: #24365a; --board-ink: #e8eef8; --module: #2b5f4f; --module-ink: #e6f4ee; --w-gnd: #9aa7bd; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1320; --surface: #142036; --fg: #eef2f8; --muted: #9aa7bd; --line: #26354f;
+  --accent: #ff7a47; --accent-ink: #ffa27a; --ok: #3fd0bf; --warn-bg: #2a1a12; --warn-line: #6b3a20;
+  --board: #24365a; --board-ink: #e8eef8; --module: #2b5f4f; --module-ink: #e6f4ee; --w-gnd: #9aa7bd; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); padding: 0 16px; }
+main { max-width: 860px; margin: 0 auto; padding-block: 40px 80px; display: flex; flex-direction: column; gap: 48px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(34px, 7vw, 56px); font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: 28px; font-weight: 800; }
+h3 { font-size: 19px; font-weight: 600; }
+p { margin: 0; max-width: 65ch; }
+section { display: flex; flex-direction: column; gap: 16px; }
+.eyebrow { font: 700 12px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-ink); }
+.lede { font-size: 19px; color: var(--muted); }
+.pin { font: 700 0.86em var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; white-space: nowrap; }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font: 500 14px var(--mono); }
+.flow span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
+.flow i { color: var(--muted); font-style: normal; }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.rule { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.rule b { font-family: var(--display); font-size: 18px; }
+
+.parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.part { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; min-width: 0; }
+.part b { display: block; }
+.part small { color: var(--muted); font-size: 14px; }
+
+.check { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.check > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+@media (max-width: 620px) { .check { grid-template-columns: 1fr; } }
+
+.map { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px; }
+.map svg { display: block; min-width: 820px; width: 100%; height: auto; }
+.map text { font-family: var(--mono); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 22px; height: 4px; border-radius: 2px; display: inline-block; }
+
+.idea { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.rows { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; font: 700 13px var(--mono); text-align: center; }
+.rows div { border-radius: 8px; padding: 8px 4px; color: #fff; }
+
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 16px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font: 700 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+tr.done td { opacity: 0.45; text-decoration: line-through; }
+td input { width: 22px; height: 22px; accent-color: var(--ok); }
+.sw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-right: 6px; }
+.group td { background: var(--bg); font: 700 13px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-ink); }
+
+ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 14px; }
+ol.steps > li { counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: start; }
+ol.steps > li::before { content: counter(s); width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #fff; font: 800 17px var(--display); display: flex; align-items: center; justify-content: center; }
+ol.steps > li > div { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+pre { margin: 0; background: var(--board); color: var(--board-ink); border-radius: 10px; padding: 12px 14px; font: 500 14px/1.5 var(--mono); overflow-x: auto; }
+.leds { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.led { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; }
+.dot { width: 18px; height: 18px; border-radius: 50%; flex: none; }
+.blink-fast { animation: bl 0.3s steps(1) infinite; } .blink-slow { animation: bl 1.4s steps(1) infinite; }
+@keyframes bl { 50% { opacity: 0.12; } }
+@media (prefers-reduced-motion: reduce) { .blink-fast, .blink-slow { animation: none; opacity: 0.6; } }
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
+details summary { cursor: pointer; font-weight: 700; }
+details p { margin-top: 8px; color: var(--muted); }
+.note { font-size: 15px; color: var(--muted); }
+</style>
+
+<main>
+  <header style="display:flex;flex-direction:column;gap:14px">
+    <div class="eyebrow">VOID-NAV · hardware build 1 · one ESP32, two LoRa radios</div>
+    <h1>VOID-NAV Wiring Guide</h1>
+    <p class="lede">Wire one ESP32 to both RA-02 LoRa radios, two LEDs and a button. Then load the code and send your first SOS from a phone. No experience needed: follow the steps in order.</p>
+    <div class="flow"><span>📱 Phone</span><i>Wi-Fi →</i><span>ESP32</span><i>→</i><span>Radio A</span><i>~ 433 MHz air ~</i><span>Radio B</span><i>→ USB →</i><span>💻 Laptop</span></div>
+    <p class="note">Radio A acts as the survivor's node and radio B as the rescue command's receiver. The message really flies through the air between the two antennas. Both radios share one ESP32 for now. When a second ESP32 arrives, each radio gets its own board.</p>
+  </header>
+
+  <section>
+    <div class="eyebrow">Before you touch anything</div>
+    <h2>Four rules that keep parts alive</h2>
+    <div class="rules">
+      <div class="rule"><b>Unplug the USB while wiring</b><span>Only plug the ESP32 in after every wire is placed and checked.</span></div>
+      <div class="rule"><b>LoRa gets 3.3 V, never 5 V</b><span>Use the pin labelled <span class="pin">3V3</span>. The pins called <span class="pin">VIN</span> or <span class="pin">5V</span> will burn the radio.</span></div>
+      <div class="rule"><b>Antenna on first</b><span>Never power a LoRa radio without its antenna attached. Sending without one can damage it.</span></div>
+      <div class="rule"><b>No loose metal</b><span>Bare wire ends must never touch each other or the table. Push each wire in firmly.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">What's on the table</div>
+    <h2>Parts for this build</h2>
+    <div class="parts">
+      <div class="part"><b>ESP32-WROOM board</b><small>The brain. Makes the Wi-Fi page and controls both radios.</small></div>
+      <div class="part"><b>2 × RA-02 LoRa + antennas</b><small>The radios. Call one "A" and one "B". Stick a paper label on each.</small></div>
+      <div class="part"><b>Breadboard</b><small>Lets one ESP32 pin feed both radios.</small></div>
+      <div class="part"><b>~25 jumper wires</b><small>Male–female wires are easiest for the radio pins.</small></div>
+      <div class="part"><b>2 LEDs + 1 button</b><small>LED 1 means read by a rescuer, LED 2 means rescue dispatched. The button sends a one-press SOS.</small></div>
+      <div class="part"><b>USB cable + laptop</b><small>Powers the ESP32 and shows the messages command receives.</small></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Check this first</div>
+    <h2>What does your LoRa radio look like?</h2>
+    <div class="check">
+      <div><h3>On a small board with pins ✅</h3><p>You see a row of metal pins with labels such as <span class="pin">NSS</span>, <span class="pin">SCK</span> and <span class="pin">3.3V</span>. Push female jumper ends straight onto them. You're ready.</p></div>
+      <div><h3>A bare silver square with tiny gold dents ⚠️</h3><p>The RA-02 alone has 2 mm pads that don't fit jumper wires or the breadboard. You need an RA-02 adapter board, or short wires soldered onto the pads. Do this before anything else.</p></div>
+    </div>
+    <p class="note">The RA-02's labels: <span class="pin">3.3V</span> <span class="pin">GND</span> <span class="pin">NSS</span> (some boards say <span class="pin">CS</span>) <span class="pin">SCK</span> <span class="pin">MISO</span> <span class="pin">MOSI</span> <span class="pin">RST</span> (or <span class="pin">RESET</span>). It also has <span class="pin">DIO0</span>–<span class="pin">DIO5</span>, which we leave empty.</p>
+  </section>
+
+  <section>
+    <div class="eyebrow">The big idea</div>
+    <h2>The breadboard is a power strip for signals</h2>
+    <p>Five wires are needed by both radios. A breadboard row of 5 holes is joined together inside, so one wire from the ESP32 and one wire to each radio meet in the same row. Make these five shared rows first:</p>
+    <div class="idea">
+      <div class="rows">
+        <div style="background:var(--w-3v3)">3V3</div><div style="background:var(--w-gnd)">GND</div><div style="background:var(--w-sck)">SCK</div><div style="background:var(--w-miso)">MISO</div><div style="background:var(--w-mosi)">MOSI</div>
+      </div>
+      <p class="note">Each row gets three wires: one from the ESP32, one to radio A, one to radio B. For GND you can use the long blue (−) rail on the side instead, because the LEDs and button need ground too. Many breadboards split that rail in the middle, so keep all GND wires on one half.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">The map</div>
+    <h2>Where every wire goes</h2>
+    <p class="note">Drawn for the common 30-pin ESP32 DevKit with the USB socket at the bottom. If your board has 38 pins, ignore the positions and match the printed pin names (<span class="pin">D18</span>, <span class="pin">G18</span>, <span class="pin">IO18</span> and <span class="pin">18</span> are all the same pin). The wire colours are only for the drawing. Real jumper colours don't matter.</p>
+    <div class="map" role="img" aria-label="Wiring map: ESP32 in the centre, radio B on the left, radio A on the right, shared breadboard rows across the top, LEDs bottom right, button bottom left.">
+      <svg viewBox="0 0 1000 880" xmlns="http://www.w3.org/2000/svg">
+        <!-- shared rows -->
+        <g font-size="13" font-weight="700">
+          <text x="500" y="22" text-anchor="middle" fill="var(--muted)">BREADBOARD · SHARED ROWS</text>
+          <line x1="190" y1="50" x2="810" y2="50" stroke="var(--w-3v3)" stroke-width="7" stroke-linecap="round"/>
+          <line x1="190" y1="75" x2="810" y2="75" stroke="var(--w-gnd)" stroke-width="7" stroke-linecap="round"/>
+          <line x1="190" y1="100" x2="810" y2="100" stroke="var(--w-sck)" stroke-width="7" stroke-linecap="round"/>
+          <line x1="190" y1="125" x2="810" y2="125" stroke="var(--w-miso)" stroke-width="7" stroke-linecap="round"/>
+          <line x1="190" y1="150" x2="810" y2="150" stroke="var(--w-mosi)" stroke-width="7" stroke-linecap="round"/>
+          <text x="440" y="44" fill="var(--fg)">3V3 row</text><text x="440" y="69" fill="var(--fg)">GND row</text>
+          <text x="440" y="94" fill="var(--fg)">SCK row</text><text x="440" y="119" fill="var(--fg)">MISO row</text><text x="440" y="144" fill="var(--fg)">MOSI row</text>
+        </g>
+
+        <g fill="none" stroke-width="3" stroke-linejoin="round">
+          <!-- ESP32 to shared rows -->
+          <path d="M600 820 H640 V50" stroke="var(--w-3v3)"/>
+          <path d="M600 780 H655 V75" stroke="var(--w-gnd)"/>
+          <path d="M600 500 H670 V100" stroke="var(--w-sck)"/>
+          <path d="M600 460 H685 V125" stroke="var(--w-miso)"/>
+          <path d="M600 260 H700 V150" stroke="var(--w-mosi)"/>
+          <!-- radio A to shared rows -->
+          <path d="M820 250 H800 V50" stroke="var(--w-3v3)"/>
+          <path d="M820 280 H785 V75" stroke="var(--w-gnd)"/>
+          <path d="M820 310 H770 V100" stroke="var(--w-sck)"/>
+          <path d="M820 340 H755 V125" stroke="var(--w-miso)"/>
+          <path d="M820 370 H740 V150" stroke="var(--w-mosi)"/>
+          <!-- radio A own pins -->
+          <path d="M600 540 H720 V400 H820" stroke="var(--w-nssa)"/>
+          <path d="M600 660 H730 V430 H820" stroke="var(--w-rsta)"/>
+          <!-- radio B to shared rows -->
+          <path d="M180 250 H200 V50" stroke="var(--w-3v3)"/>
+          <path d="M180 280 H215 V75" stroke="var(--w-gnd)"/>
+          <path d="M180 310 H230 V100" stroke="var(--w-sck)"/>
+          <path d="M180 340 H245 V125" stroke="var(--w-miso)"/>
+          <path d="M180 370 H260 V150" stroke="var(--w-mosi)"/>
+          <!-- radio B own pins -->
+          <path d="M400 620 H300 V400 H180" stroke="var(--w-nssb)"/>
+          <path d="M400 460 H285 V430 H180" stroke="var(--w-rstb)"/>
+          <!-- LEDs -->
+          <path d="M600 420 H712 V620 H860" stroke="var(--w-led1)"/>
+          <path d="M600 300 H726 V720 H860" stroke="var(--w-led2)"/>
+          <path d="M920 620 H960 V800" stroke="var(--w-gnd)" stroke-dasharray="6 5"/>
+          <path d="M920 720 H960" stroke="var(--w-gnd)" stroke-dasharray="6 5"/>
+          <!-- button -->
+          <path d="M400 740 H180" stroke="var(--w-btn)"/>
+          <path d="M400 780 H340 V820 H130 V780" stroke="var(--w-gnd)"/>
+        </g>
+        <!-- junction dots -->
+        <g>
+          <circle cx="640" cy="50" r="5" fill="var(--w-3v3)"/><circle cx="655" cy="75" r="5" fill="var(--w-gnd)"/><circle cx="670" cy="100" r="5" fill="var(--w-sck)"/><circle cx="685" cy="125" r="5" fill="var(--w-miso)"/><circle cx="700" cy="150" r="5" fill="var(--w-mosi)"/>
+          <circle cx="800" cy="50" r="5" fill="var(--w-3v3)"/><circle cx="785" cy="75" r="5" fill="var(--w-gnd)"/><circle cx="770" cy="100" r="5" fill="var(--w-sck)"/><circle cx="755" cy="125" r="5" fill="var(--w-miso)"/><circle cx="740" cy="150" r="5" fill="var(--w-mosi)"/>
+          <circle cx="200" cy="50" r="5" fill="var(--w-3v3)"/><circle cx="215" cy="75" r="5" fill="var(--w-gnd)"/><circle cx="230" cy="100" r="5" fill="var(--w-sck)"/><circle cx="245" cy="125" r="5" fill="var(--w-miso)"/><circle cx="260" cy="150" r="5" fill="var(--w-mosi)"/>
+        </g>
+
+        <!-- ESP32 board -->
+        <rect x="400" y="200" width="200" height="660" rx="14" fill="var(--board)"/>
+        <rect x="455" y="210" width="90" height="30" rx="4" fill="none" stroke="var(--board-ink)" stroke-opacity="0.4"/>
+        <text x="500" y="230" text-anchor="middle" font-size="11" fill="var(--board-ink)" fill-opacity="0.7">antenna</text>
+        <text x="500" y="560" text-anchor="middle" font-size="18" font-weight="700" fill="var(--board-ink)">ESP32</text>
+        <rect x="475" y="840" width="50" height="26" rx="4" fill="var(--board-ink)" fill-opacity="0.85"/>
+        <text x="500" y="858" text-anchor="middle" font-size="11" font-weight="700" fill="var(--board)">USB</text>
+        <g font-size="12" fill="var(--board-ink)">
+          <!-- left column -->
+          <g fill-opacity="0.45">
+            <text x="414" y="264">EN</text><text x="414" y="304">VP</text><text x="414" y="344">VN</text><text x="414" y="384">D34</text><text x="414" y="424">D35</text>
+            <text x="414" y="504">D33</text><text x="414" y="544">D25</text><text x="414" y="584">D26</text><text x="414" y="664">D14</text><text x="414" y="704">D12</text><text x="414" y="824">VIN ✗</text>
+          </g>
+          <g font-weight="700"><text x="414" y="464">D32</text><text x="414" y="624">D27</text><text x="414" y="744">D13</text><text x="414" y="784">GND</text></g>
+          <!-- right column -->
+          <g fill-opacity="0.45" text-anchor="end">
+            <text x="586" y="344">TX0</text><text x="586" y="384">RX0</text><text x="586" y="584">TX2</text><text x="586" y="624">RX2</text><text x="586" y="704">D2</text><text x="586" y="744">D15</text>
+          </g>
+          <g font-weight="700" text-anchor="end">
+            <text x="586" y="264">D23</text><text x="586" y="304">D22</text><text x="586" y="424">D21</text><text x="586" y="464">D19</text><text x="586" y="504">D18</text>
+            <text x="586" y="544">D5</text><text x="586" y="664">D4</text><text x="586" y="784">GND</text><text x="586" y="824">3V3</text>
+          </g>
+        </g>
+        <g fill="var(--board-ink)">
+          <circle cx="400" cy="460" r="5"/><circle cx="400" cy="620" r="5"/><circle cx="400" cy="740" r="5"/><circle cx="400" cy="780" r="5"/>
+          <circle cx="600" cy="260" r="5"/><circle cx="600" cy="300" r="5"/><circle cx="600" cy="420" r="5"/><circle cx="600" cy="460" r="5"/><circle cx="600" cy="500" r="5"/><circle cx="600" cy="540" r="5"/><circle cx="600" cy="660" r="5"/><circle cx="600" cy="780" r="5"/><circle cx="600" cy="820" r="5"/>
+        </g>
+
+        <!-- radio A -->
+        <rect x="820" y="210" width="165" height="250" rx="12" fill="var(--module)"/>
+        <text x="902" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="var(--fg)">RADIO A · node</text>
+        <line x1="960" y1="210" x2="960" y2="180" stroke="var(--module)" stroke-width="5"/><circle cx="960" cy="176" r="6" fill="var(--module)"/>
+        <g font-size="13" font-weight="700" fill="var(--module-ink)">
+          <text x="834" y="254">3.3V</text><text x="834" y="284">GND</text><text x="834" y="314">SCK</text><text x="834" y="344">MISO</text><text x="834" y="374">MOSI</text><text x="834" y="404">NSS</text><text x="834" y="434">RST</text>
+        </g>
+        <!-- radio B -->
+        <rect x="15" y="210" width="165" height="250" rx="12" fill="var(--module)"/>
+        <text x="97" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="var(--fg)">RADIO B · command</text>
+        <line x1="40" y1="210" x2="40" y2="180" stroke="var(--module)" stroke-width="5"/><circle cx="40" cy="176" r="6" fill="var(--module)"/>
+        <g font-size="13" font-weight="700" fill="var(--module-ink)" text-anchor="end">
+          <text x="166" y="254">3.3V</text><text x="166" y="284">GND</text><text x="166" y="314">SCK</text><text x="166" y="344">MISO</text><text x="166" y="374">MOSI</text><text x="166" y="404">NSS</text><text x="166" y="434">RST</text>
+        </g>
+
+        <!-- LEDs -->
+        <g>
+          <circle cx="890" cy="620" r="22" fill="var(--w-led1)"/><text x="890" y="660" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">LED 1 · read</text>
+          <circle cx="890" cy="720" r="22" fill="var(--w-led2)"/><text x="890" y="760" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">LED 2 · dispatched</text>
+          <text x="866" y="606" font-size="11" fill="var(--fg)">+</text><text x="866" y="706" font-size="11" fill="var(--fg)">+</text>
+          <text x="925" y="612" font-size="11" fill="var(--fg)">−</text><text x="925" y="712" font-size="11" fill="var(--fg)">−</text>
+          <text x="965" y="820" text-anchor="end" font-size="12" fill="var(--muted)">short legs → GND</text>
+        </g>
+        <!-- button -->
+        <rect x="90" y="720" width="90" height="60" rx="8" fill="var(--surface)" stroke="var(--fg)" stroke-width="2"/>
+        <circle cx="135" cy="750" r="16" fill="var(--w-btn)"/>
+        <text x="135" y="706" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">BUTTON</text>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--w-3v3)"></i>3.3 V power</span><span><i style="background:var(--w-gnd)"></i>Ground</span>
+      <span><i style="background:var(--w-sck)"></i>SCK clock</span><span><i style="background:var(--w-miso)"></i>MISO</span><span><i style="background:var(--w-mosi)"></i>MOSI</span>
+      <span><i style="background:var(--w-nssa)"></i>Radio A select</span><span><i style="background:var(--w-rsta)"></i>Radio A reset</span>
+      <span><i style="background:var(--w-nssb)"></i>Radio B select</span><span><i style="background:var(--w-rstb)"></i>Radio B reset</span>
+      <span><i style="background:var(--w-led1)"></i>LED 1</span><span><i style="background:var(--w-led2)"></i>LED 2</span><span><i style="background:var(--w-btn)"></i>Button</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Wire by wire</div>
+    <h2>The checklist: tick each wire as you place it</h2>
+    <p class="note">Your ticks are saved in this browser only.</p>
+    <div class="tablewrap">
+      <table id="wires">
+        <thead><tr><th>Done</th><th>Wire</th><th>From ESP32 pin</th><th>To</th></tr></thead>
+        <tbody>
+          <tr class="group"><td colspan="4">Step 1 · shared rows (ESP32 → breadboard)</td></tr>
+          <tr><td><input type="checkbox" id="w1"></td><td><span class="sw" style="background:var(--w-3v3)"></span>Power</td><td><span class="pin">3V3</span></td><td>3V3 row</td></tr>
+          <tr><td><input type="checkbox" id="w2"></td><td><span class="sw" style="background:var(--w-gnd)"></span>Ground</td><td><span class="pin">GND</span></td><td>GND row or blue (−) rail</td></tr>
+          <tr><td><input type="checkbox" id="w3"></td><td><span class="sw" style="background:var(--w-sck)"></span>Clock</td><td><span class="pin">D18</span></td><td>SCK row</td></tr>
+          <tr><td><input type="checkbox" id="w4"></td><td><span class="sw" style="background:var(--w-miso)"></span>Data in</td><td><span class="pin">D19</span></td><td>MISO row</td></tr>
+          <tr><td><input type="checkbox" id="w5"></td><td><span class="sw" style="background:var(--w-mosi)"></span>Data out</td><td><span class="pin">D23</span></td><td>MOSI row</td></tr>
+          <tr class="group"><td colspan="4">Step 2 · radio A (the survivor node)</td></tr>
+          <tr><td><input type="checkbox" id="w6"></td><td><span class="sw" style="background:var(--w-3v3)"></span>Power</td><td>3V3 row</td><td>A <span class="pin">3.3V</span></td></tr>
+          <tr><td><input type="checkbox" id="w7"></td><td><span class="sw" style="background:var(--w-gnd)"></span>Ground</td><td>GND row</td><td>A <span class="pin">GND</span></td></tr>
+          <tr><td><input type="checkbox" id="w8"></td><td><span class="sw" style="background:var(--w-sck)"></span>Clock</td><td>SCK row</td><td>A <span class="pin">SCK</span></td></tr>
+          <tr><td><input type="checkbox" id="w9"></td><td><span class="sw" style="background:var(--w-miso)"></span>Data in</td><td>MISO row</td><td>A <span class="pin">MISO</span></td></tr>
+          <tr><td><input type="checkbox" id="w10"></td><td><span class="sw" style="background:var(--w-mosi)"></span>Data out</td><td>MOSI row</td><td>A <span class="pin">MOSI</span></td></tr>
+          <tr><td><input type="checkbox" id="w11"></td><td><span class="sw" style="background:var(--w-nssa)"></span>Select A</td><td><span class="pin">D5</span></td><td>A <span class="pin">NSS</span></td></tr>
+          <tr><td><input type="checkbox" id="w12"></td><td><span class="sw" style="background:var(--w-rsta)"></span>Reset A</td><td><span class="pin">D4</span></td><td>A <span class="pin">RST</span></td></tr>
+          <tr class="group"><td colspan="4">Step 3 · radio B (the command receiver)</td></tr>
+          <tr><td><input type="checkbox" id="w13"></td><td><span class="sw" style="background:var(--w-3v3)"></span>Power</td><td>3V3 row</td><td>B <span class="pin">3.3V</span></td></tr>
+          <tr><td><input type="checkbox" id="w14"></td><td><span class="sw" style="background:var(--w-gnd)"></span>Ground</td><td>GND row</td><td>B <span class="pin">GND</span></td></tr>
+          <tr><td><input type="checkbox" id="w15"></td><td><span class="sw" style="background:var(--w-sck)"></span>Clock</td><td>SCK row</td><td>B <span class="pin">SCK</span></td></tr>
+          <tr><td><input type="checkbox" id="w16"></td><td><span class="sw" style="background:var(--w-miso)"></span>Data in</td><td>MISO row</td><td>B <span class="pin">MISO</span></td></tr>
+          <tr><td><input type="checkbox" id="w17"></td><td><span class="sw" style="background:var(--w-mosi)"></span>Data out</td><td>MOSI row</td><td>B <span class="pin">MOSI</span></td></tr>
+          <tr><td><input type="checkbox" id="w18"></td><td><span class="sw" style="background:var(--w-nssb)"></span>Select B</td><td><span class="pin">D27</span></td><td>B <span class="pin">NSS</span></td></tr>
+          <tr><td><input type="checkbox" id="w19"></td><td><span class="sw" style="background:var(--w-rstb)"></span>Reset B</td><td><span class="pin">D32</span></td><td>B <span class="pin">RST</span></td></tr>
+          <tr class="group"><td colspan="4">Step 4 · LEDs and button</td></tr>
+          <tr><td><input type="checkbox" id="w20"></td><td><span class="sw" style="background:var(--w-led1)"></span>LED 1 long leg (+)</td><td><span class="pin">D21</span></td><td>LED 1 short leg → GND rail</td></tr>
+          <tr><td><input type="checkbox" id="w21"></td><td><span class="sw" style="background:var(--w-led2)"></span>LED 2 long leg (+)</td><td><span class="pin">D22</span></td><td>LED 2 short leg → GND rail</td></tr>
+          <tr><td><input type="checkbox" id="w22"></td><td><span class="sw" style="background:var(--w-btn)"></span>Button leg 1</td><td><span class="pin">D13</span></td><td>one button leg</td></tr>
+          <tr><td><input type="checkbox" id="w23"></td><td><span class="sw" style="background:var(--w-gnd)"></span>Button leg 2</td><td>GND rail</td><td>the diagonally opposite leg</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Small parts, explained</div>
+    <h2>LEDs and the button</h2>
+    <div class="check">
+      <div><h3>LED: which leg is which?</h3><p>The <b>long leg</b> is plus (+) and goes to the ESP32 pin. The <b>short leg</b> is minus (−) and goes to ground. The rim of the LED is also flat on the minus side. Put the two legs in <b>different</b> breadboard rows, or the LED never lights.</p><p class="note">We have no resistors, so the code limits the ESP32 pin to a gentle current. If you find a 220 Ω–1 kΩ resistor later, put it between the pin and the long leg.</p></div>
+      <div><h3>Button: use opposite corners</h3><p>The button has 4 legs. Plug it across the middle gap of the breadboard. Connect <b>one corner</b> to <span class="pin">D13</span> and the <b>diagonally opposite corner</b> to ground. Opposite corners are always the pair that the press connects.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Software</div>
+    <h2>Load the code</h2>
+    <ol class="steps">
+      <li><div><h3>Install Arduino IDE 2</h3><p>From arduino.cc/en/software. Open it once.</p></div></li>
+      <li><div><h3>Add ESP32 support</h3><p>Go to <b>File → Preferences → Additional boards manager URLs</b> and paste this link:</p><pre>https://espressif.github.io/arduino-esp32/package_esp32_index.json</pre><p>Then open <b>Tools → Board → Boards Manager</b>, search <b>esp32</b>, and install <b>esp32 by Espressif Systems</b> (3.x).</p></div></li>
+      <li><div><h3>Add the LoRa library</h3><p>Open <b>Sketch → Include Library → Manage Libraries</b>, search <b>LoRa</b>, and install <b>LoRa by Sandeep Mistry</b>.</p></div></li>
+      <li><div><h3>Open the sketch</h3><p>Open <span class="pin">firmware/voidnav_esp32/voidnav_esp32.ino</span> from the repo. Keep the folder name and the file name the same.</p></div></li>
+      <li><div><h3>Pick the board and port</h3><p>Choose <b>Tools → Board → esp32 → ESP32 Dev Module</b>. Plug in the USB cable, then pick the new entry under <b>Tools → Port</b> (COM3 on Windows, /dev/ttyUSB0 on Linux, /dev/cu.usbserial… on a Mac). If no port appears, try a different cable, because some cables only charge. You may also need the CP210x or CH340 driver.</p></div></li>
+      <li><div><h3>Upload</h3><p>Click the → arrow. If it stops at <b>"Connecting…"</b>, hold the <b>BOOT</b> button on the ESP32 until the upload starts.</p></div></li>
+      <li><div><h3>Watch it start</h3><p>Open <b>Tools → Serial Monitor</b> and set it to <b>115200 baud</b>. Press the <b>EN</b> (reset) button once. You should see:</p><pre># Radio A (node) OK
+# Radio B (gateway) OK
+# Wi-Fi "VOID-NAV SOS" up, page at http://192.168.4.1
+{"ev":"boot","role":"single","node":"3F2A","radioA":true,"radioB":true}</pre></div></li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="eyebrow">First test</div>
+    <h2>Send your first SOS</h2>
+    <ol class="steps">
+      <li><div><h3>Spread the antennas</h3><p>Point the two antennas away from each other, at least a hand-length apart. The code makes the radios whisper because they are so close.</p></div></li>
+      <li><div><h3>Join the Wi-Fi from a phone</h3><p>Connect to <b>VOID-NAV SOS</b>, which has no password. A "Sign in to network" page should pop up. If it doesn't, open a browser and go to <span class="pin">192.168.4.1</span>.</p></div></li>
+      <li><div><h3>Send</h3><p>Pick a type, type a message, and press <b>SEND SOS</b>. In the Serial Monitor a line starting with <span class="pin">{"ev":"sos"</span> appears. That message crossed the air from radio A to radio B. On the phone, step 2 "Reached rescue command" turns on.</p></div></li>
+      <li><div><h3>Act as the rescuer</h3><p>In the Serial Monitor's text box, type the commands below, using the ID from the sos line. Press Enter after each.</p><pre>READ 3F2A-517
+DISPATCH 3F2A-517</pre><p>Each status travels back over LoRa to radio A. LED 1 lights up after READ, LED 2 after DISPATCH, and the phone page updates too.</p></div></li>
+      <li><div><h3>Try the button</h3><p>Press it once. A ready-made SOS is sent with no phone needed.</p></div></li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="eyebrow">Reading the lights</div>
+    <h2>What the LEDs mean</h2>
+    <div class="leds">
+      <div class="led"><span class="dot blink-fast" style="background:var(--w-led1)"></span><span><b>LED 1 fast blink</b><br>Sending and waiting for the receiver</span></div>
+      <div class="led"><span class="dot blink-slow" style="background:var(--w-led1)"></span><span><b>LED 1 slow blink</b><br>Reached command, not read yet</span></div>
+      <div class="led"><span class="dot" style="background:var(--w-led1)"></span><span><b>LED 1 solid</b><br>A rescuer read it</span></div>
+      <div class="led"><span class="dot" style="background:var(--w-led2)"></span><span><b>LED 2 solid</b><br>Rescue dispatched</span></div>
+      <div class="led"><span class="dot blink-slow" style="background:var(--w-led1)"></span><span class="dot blink-fast" style="background:var(--w-led2)"></span><span><b>Both flashing</b><br>Not delivered after 8 tries, or a radio wasn't found</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">If something's wrong</div>
+    <h2>Fixes for the usual problems</h2>
+    <details><summary>"Radio A not found" or "Radio B not found"</summary><p>Unplug the USB first. Check that radio's NSS and RST wires (A: D5 and D4, B: D27 and D32). Then check that all five shared rows reach that radio. A wire in the wrong breadboard row is the most common cause. If only one radio fails, swap the radios to see whether the module or the wiring is at fault.</p></details>
+    <details><summary>Both radios found, but no sos line appears</summary><p>Check that both antennas are attached and the radios are on the same 433 MHz setting (both RA-02, so they are). Move the antennas further apart, since radios that are too close can deafen each other. Watch for "# TX A" lines: if the node keeps retrying, the message isn't arriving.</p></details>
+    <details><summary>The upload fails</summary><p>Hold BOOT during "Connecting…". Use a data USB cable. Close the Serial Monitor in other programs. If your 38-pin board resets in a loop, temporarily unplug the wire on D5.</p></details>
+    <details><summary>No pop-up page on the phone</summary><p>Turn off mobile data, then open 192.168.4.1 in the browser. Some phones say "no internet, stay connected?" Choose to stay connected.</p></details>
+    <details><summary>An LED never lights</summary><p>Turn the LED around: the long leg goes to the pin. Make sure its legs are in different rows, and that the short leg's rail really is ground.</p></details>
+  </section>
+</main>
+
+<script>
+  const boxes = document.querySelectorAll('#wires input[type=checkbox]');
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem('vn-wires') || '{}'); } catch (e) {}
+  boxes.forEach(b => {
+    b.checked = !!saved[b.id];
+    b.closest('tr').classList.toggle('done', b.checked);
+    b.addEventListener('change', () => {
+      saved[b.id] = b.checked;
+      b.closest('tr').classList.toggle('done', b.checked);
+      try { localStorage.setItem('vn-wires', JSON.stringify(saved)); } catch (e) {}
+    });
+  });
+</script>
