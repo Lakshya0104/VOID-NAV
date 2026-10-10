@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0f1a">
+<title>SOS Node1</title><link rel="icon" href="favicon.svg">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{--bg:#0a0f1a;--card:#121a29;--line:#22304a;--fg:#f1f5ff;--mut:#8a9ab3;--red:#ff3b5c;--org:#ff9f1c;--grn:#2fe08a;--cyan:#43c6ff;--f:'Sora','Noto Sans Telugu','Noto Sans Devanagari',system-ui,sans-serif;--m:'JetBrains Mono',ui-monospace,monospace;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:var(--f)}
+.scr{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);display:flex;flex-direction:column;gap:14px}
+.scr[hidden]{display:none}
+.bar{display:flex;justify-content:space-between;align-items:center;font:600 12px var(--m);color:var(--mut)}
+.bar .ok{color:var(--grn)}
+h1{margin:4px 0 0;font-size:26px;line-height:1.15}h1 small{display:block;margin-top:6px;font-size:14px;font-weight:400;color:var(--mut)}
+.lbl{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-top:4px}
+button{font-family:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:15px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.net{display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;background:var(--card);border:1px solid var(--line);font-size:16px;text-align:left;width:100%}
+.net .nm{flex:1}.net .nm small{display:block;color:var(--mut);font-size:12px;margin-top:3px}
+.net.void{border-color:var(--red);box-shadow:0 0 0 1px var(--red),0 0 28px rgba(255,59,92,.28);animation:glow 1.6s infinite}
+@keyframes glow{50%{box-shadow:0 0 0 1px var(--red),0 0 44px rgba(255,59,92,.5)}}
+.net.dim{opacity:.5}
+.ctr{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}
+.ring{width:120px;height:120px}.ring .spin{transform-origin:50% 50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ring .tick{stroke-dasharray:60;stroke-dashoffset:60}.ring.ok .spin{display:none}.ring.ok .bg{stroke:var(--grn)}.ring.ok .tick{animation:dr .5s forwards}
+@keyframes dr{to{stroke-dashoffset:0}}
+.steps{list-style:none;padding:0;margin:0;display:grid;gap:9px;font-size:15px;text-align:left}
+.steps li{opacity:.3;transition:.3s}.steps li.on{opacity:1}.steps li b{display:inline-block;width:20px;font-family:var(--m);color:var(--grn)}
+.langs{display:flex;gap:8px}.langs button{flex:1}
+.on{border-color:var(--cyan)!important;background:rgba(67,198,255,.13)!important}
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cats button{padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;font-weight:600}
+.cats button i{font-style:normal;font-size:24px}
+.cats button.on{border-color:var(--red)!important;background:rgba(255,59,92,.15)!important}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips button{padding:9px 12px;font-size:14px;border-radius:30px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:15px}
+.step{display:flex;align-items:center;gap:12px}.step button{width:44px;height:44px;padding:0;font-size:22px}.step b{font-size:22px;min-width:30px;text-align:center}
+.seg{display:flex;gap:4px}.seg button{padding:8px 10px;font-size:13px;border-radius:10px}
+textarea{width:100%;min-height:76px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:16px var(--f);padding:12px;resize:vertical}
+.send{background:var(--red);border:0;font-size:21px;font-weight:800;padding:18px;border-radius:18px;box-shadow:0 10px 30px rgba(255,59,92,.4)}
+.send:disabled{opacity:.5}
+.err{color:#ff8fa3;font-size:14px;min-height:18px;text-align:center}
+.priv{font-size:12px;color:var(--mut);text-align:center}
+/* status */
+.track{display:grid;gap:0}
+.st{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;padding:10px 0;opacity:.35;transition:.4s}
+.st.on{opacity:1}
+.st .dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:13px;margin-top:2px}
+.st.on .dot{border-color:var(--c);background:var(--c);color:#0a0f1a;box-shadow:0 0 18px var(--c)}
+.st.cur .dot{animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px transparent,0 0 28px var(--c)}}
+.st b{font-size:18px;display:block}.st small{color:var(--mut);font-size:13px}
+.leds{display:flex;gap:28px;justify-content:center;padding:6px 0}
+.led{display:flex;flex-direction:column;align-items:center;gap:7px;font:600 11px var(--m);color:var(--mut)}
+.led b{width:30px;height:30px;border-radius:50%;background:#1b2434;border:2px solid #2b3850}
+.led.org b{--l:var(--org)}.led.grn b{--l:var(--grn)}
+.led.solid b{background:var(--l);box-shadow:0 0 26px var(--l)}.led.fast b{animation:bl .3s infinite alternate}.led.slow b{animation:bl 1s infinite alternate}
+@keyframes bl{from{background:#1b2434}to{background:var(--l);box-shadow:0 0 22px var(--l)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;color:var(--mut)}
+.card code{font-family:var(--m);color:#cbbcff;font-size:15px;letter-spacing:.06em}
+.reply{background:rgba(47,224,138,.12);border:1px solid var(--grn);border-radius:14px;padding:12px 14px;font-size:16px;animation:pop .4s}
+.reply small{display:block;font:600 11px var(--m);color:var(--grn);margin-bottom:4px}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.flash{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:9}
+.flash.go{animation:fl 1.2s}@keyframes fl{20%{opacity:.55}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="flash" id="flash"></div>
+
+<!-- 1 · join network (what the survivor sees in phone Wi-Fi settings) -->
+<section class="scr" id="s1">
+  <div class="bar"><span>Wi-Fi</span><span>No service</span></div>
+  <h1>Choose a network<small>Mobile network is down. A rescue beacon is nearby.</small></h1>
+  <div class="lbl">Available networks</div>
+  <button class="net void" id="join"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff3b5c" stroke-width="2.2" stroke-linecap="round"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1.4" fill="#ff3b5c"/></svg>
+    <span class="nm"><b>SOS Node1</b><small>Rescue node · open · no password</small></span></button>
+  <div class="net dim"><span>🔒</span><span class="nm">JioFiber-4B21<small>Out of range</small></span></div>
+  <div class="net dim"><span>🔒</span><span class="nm">Airtel_Xstream<small>Out of range</small></span></div>
+</section>
+
+<!-- 2 · joining -->
+<section class="scr" id="s2" hidden>
+  <div class="ctr">
+    <svg class="ring" id="ring" viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44" fill="none" stroke="#22304a" stroke-width="6"/><circle class="spin" cx="50" cy="50" r="44" fill="none" stroke="#43c6ff" stroke-width="6" stroke-linecap="round" stroke-dasharray="70 210"/><path class="tick" d="M30 52 l13 13 l27 -29" fill="none" stroke="#2fe08a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h1 id="jt" style="text-align:center">Connecting…<small>SOS Node1</small></h1>
+    <ul class="steps" id="steps"><li><b>○</b>Joining beacon hotspot</li><li><b>○</b>Getting address</li><li><b>○</b>Opening SOS page</li><li><b>○</b>Beacon N1 reachable</li></ul>
+  </div>
+</section>
+
+<!-- 3 · SOS form -->
+<section class="scr" id="s3" hidden>
+  <div class="bar"><span class="ok">● SOS Node1</span><span>no internet needed</span></div>
+  <h1 id="t_title">Send SOS<small id="t_sub">A rescue team nearby will see this.</small></h1>
+  <div class="langs" id="langs"><button data-l="en" class="on">English</button><button data-l="hi">हिंदी</button><button data-l="te">తెలుగు</button></div>
+  <div class="lbl" id="t_what">What happened?</div>
+  <div class="cats" id="cats"></div>
+  <div class="row"><span id="t_ppl">People with you</span><div class="step"><button id="pm" aria-label="fewer">−</button><b id="pv">1</b><button id="pp" aria-label="more">+</button></div></div>
+  <div class="row"><span id="t_inj">Anyone injured?</span><div class="seg" data-k="injured"></div></div>
+  <div class="row"><span id="t_bleed">Bleeding?</span><div class="seg" data-k="bleeding"></div></div>
+  <div class="lbl" id="t_where">Where are you?</div>
+  <div class="chips" id="pos"></div>
+  <div class="lbl" id="t_who">Who is with you?</div>
+  <div class="chips" id="vuln"></div>
+  <div class="lbl" id="t_need">What do you need?</div>
+  <div class="chips" id="needs"></div>
+  <textarea id="note" maxlength="160" placeholder="Short note (optional): floor, landmark, condition"></textarea>
+  <div class="err" id="err" role="alert"></div>
+  <button class="send" id="send">SEND SOS</button>
+  <div class="priv" id="t_priv">No name or phone number is collected.</div>
+</section>
+
+<!-- 4 · live status -->
+<section class="scr" id="s4" hidden>
+  <div class="bar"><span class="ok">● SOS Node1</span><span id="sid"></span></div>
+  <h1 id="headline">Sending…<small id="subline">Keep this page open.</small></h1>
+  <div class="track" id="track">
+    <div class="st" data-s="SENDING" style="--c:var(--org)"><span class="dot">1</span><span><b>Sending</b><small id="tryl">Beacon node is transmitting over LoRa</small></span></div>
+    <div class="st" data-s="DELIVERED" style="--c:var(--cyan)"><span class="dot">2</span><span><b>Delivered</b><small>Command post received it</small></span></div>
+    <div class="st" data-s="READ" style="--c:var(--org)"><span class="dot">✓✓</span><span><b>Read by rescuer</b><small>A person has seen your SOS</small></span></div>
+    <div class="st" data-s="DISPATCHED" style="--c:var(--grn)"><span class="dot">➜</span><span><b>Help dispatched</b><small id="teaml">A rescue team is on the way</small></span></div>
+  </div>
+  <div id="replies" style="display:grid;gap:10px"></div>
+  <div class="card" id="summary"></div>
+  <div class="card" style="color:var(--fg)"><b>While you wait</b><br>Stay where you are · save phone battery · tap metal or a pipe if you hear rescuers · keep this page open</div>
+  <button id="retry" hidden>Try sending again</button>
+  <button id="again">Send another SOS</button>
+</section>
+
+<script>
+const $ = s => document.querySelector(s), sleep = ms => new Promise(r => setTimeout(r, ms));
+const show = id => document.querySelectorAll('.scr').forEach(s => s.hidden = s.id !== id);
+const L = {
+  en: { title: 'Send SOS', sub: 'A rescue team nearby will see this.', what: 'What happened?', ppl: 'People with you', inj: 'Anyone injured?', bleed: 'Bleeding?', where: 'Where are you?', who: 'Who is with you?', need: 'What do you need?', priv: 'No name or phone number is collected.', send: 'SEND SOS', note: 'Short note (optional): floor, landmark, condition', yes: 'Yes', no: 'No', uns: 'Not sure', pick: 'Tap what happened first.',
+    cats: { TRAPPED: 'Trapped', COLLAPSE: 'Collapse', MEDICAL: 'Medical', FIRE: 'Fire', FLOOD: 'Flood', FOOD_WATER: 'Food / water', SHELTER: 'Shelter', SAFE: 'I am safe', OTHER: 'Other' },
+    pos: { GROUND: 'Ground floor', UPPER_FLOOR: 'Upper floor', BASEMENT: 'Basement', ROOF: 'Roof', OUTSIDE: 'Outside', VEHICLE: 'Vehicle' },
+    vuln: { CHILD: 'Child', ELDERLY: 'Elderly', PREGNANT: 'Pregnant', DISABLED: 'Disabled' },
+    needs: { MEDICAL: 'Doctor', WATER: 'Water', FOOD: 'Food', EVACUATION: 'Evacuation', SHELTER: 'Shelter', RESCUE_TOOLS: 'Rescue tools', MEDICINE: 'Medicine', LIGHT: 'Light' } },
+  hi: { title: 'SOS भेजें', sub: 'पास की बचाव टीम इसे देखेगी।', what: 'क्या हुआ?', ppl: 'आपके साथ लोग', inj: 'कोई घायल?', bleed: 'खून बह रहा है?', where: 'आप कहाँ हैं?', who: 'साथ में कौन है?', need: 'क्या चाहिए?', priv: 'नाम या फ़ोन नंबर नहीं लिया जाता।', send: 'SOS भेजें', note: 'छोटा संदेश (वैकल्पिक)', yes: 'हाँ', no: 'नहीं', uns: 'पता नहीं', pick: 'पहले बताइए क्या हुआ।',
+    cats: { TRAPPED: 'फँसे हैं', COLLAPSE: 'इमारत गिरी', MEDICAL: 'इलाज', FIRE: 'आग', FLOOD: 'बाढ़', FOOD_WATER: 'खाना / पानी', SHELTER: 'आश्रय', SAFE: 'सुरक्षित हूँ', OTHER: 'अन्य' },
+    pos: { GROUND: 'भूतल', UPPER_FLOOR: 'ऊपरी मंज़िल', BASEMENT: 'तहखाना', ROOF: 'छत', OUTSIDE: 'बाहर', VEHICLE: 'गाड़ी' },
+    vuln: { CHILD: 'बच्चा', ELDERLY: 'बुज़ुर्ग', PREGNANT: 'गर्भवती', DISABLED: 'दिव्यांग' },
+    needs: { MEDICAL: 'डॉक्टर', WATER: 'पानी', FOOD: 'खाना', EVACUATION: 'निकासी', SHELTER: 'आश्रय', RESCUE_TOOLS: 'बचाव औज़ार', MEDICINE: 'दवा', LIGHT: 'रोशनी' } },
+  te: { title: 'SOS పంపండి', sub: 'దగ్గరలోని రెస్క్యూ బృందం చూస్తుంది.', what: 'ఏం జరిగింది?', ppl: 'మీతో ఉన్నవారు', inj: 'ఎవరైనా గాయపడ్డారా?', bleed: 'రక్తం కారుతోందా?', where: 'మీరు ఎక్కడ ఉన్నారు?', who: 'మీతో ఎవరు ఉన్నారు?', need: 'ఏం కావాలి?', priv: 'పేరు లేదా ఫోన్ నంబర్ తీసుకోము.', send: 'SOS పంపండి', note: 'చిన్న సందేశం (ఐచ్ఛికం)', yes: 'అవును', no: 'లేదు', uns: 'తెలియదు', pick: 'ముందు ఏం జరిగిందో ఎంచుకోండి.',
+    cats: { TRAPPED: 'చిక్కుకున్నాం', COLLAPSE: 'భవనం కూలింది', MEDICAL: 'వైద్యం', FIRE: 'మంటలు', FLOOD: 'వరద', FOOD_WATER: 'ఆహారం / నీరు', SHELTER: 'ఆశ్రయం', SAFE: 'సురక్షితం', OTHER: 'ఇతర' },
+    pos: { GROUND: 'గ్రౌండ్ ఫ్లోర్', UPPER_FLOOR: 'పై అంతస్తు', BASEMENT: 'సెల్లార్', ROOF: 'పైకప్పు', OUTSIDE: 'బయట', VEHICLE: 'వాహనం' },
+    vuln: { CHILD: 'పిల్లలు', ELDERLY: 'వృద్ధులు', PREGNANT: 'గర్భిణి', DISABLED: 'దివ్యాంగులు' },
+    needs: { MEDICAL: 'డాక్టర్', WATER: 'నీరు', FOOD: 'ఆహారం', EVACUATION: 'తరలింపు', SHELTER: 'ఆశ్రయం', RESCUE_TOOLS: 'రెస్క్యూ పరికరాలు', MEDICINE: 'మందులు', LIGHT: 'వెలుతురు' } },
+};
+const ICON = { TRAPPED: '🧱', COLLAPSE: '🏚️', MEDICAL: '🩺', FIRE: '🔥', FLOOD: '🌊', FOOD_WATER: '💧', SHELTER: '⛺', SAFE: '✅', OTHER: '❔' };
+const F = { lang: 'en', cat: null, people: 1, injured: 'unsure', bleeding: 'no', pos: null, vuln: new Set(), needs: new Set(), id: null };
+
+function render() { const t = L[F.lang];
+  for (const k of ['what', 'ppl', 'inj', 'bleed', 'where', 'who', 'need', 'priv']) $('#t_' + k).textContent = t[k];
+  $('#t_title').firstChild.textContent = t.title; $('#t_sub').textContent = t.sub; $('#send').textContent = t.send; $('#note').placeholder = t.note;
+  document.querySelectorAll('#langs button').forEach(b => b.classList.toggle('on', b.dataset.l === F.lang));
+  $('#cats').innerHTML = Object.entries(t.cats).map(([k, v]) => `<button data-v="${k}" class="${F.cat === k ? 'on' : ''}"><i>${ICON[k]}</i>${v}</button>`).join('');
+  const chips = (el, dict, isOn) => $(el).innerHTML = Object.entries(dict).map(([k, v]) => `<button data-v="${k}" class="${isOn(k) ? 'on' : ''}">${v}</button>`).join('');
+  chips('#pos', t.pos, k => F.pos === k); chips('#vuln', t.vuln, k => F.vuln.has(k)); chips('#needs', t.needs, k => F.needs.has(k));
+  document.querySelectorAll('.seg').forEach(s => { const k = s.dataset.k; s.innerHTML = [['yes', t.yes], ['no', t.no], ['unsure', t.uns]].map(([v, l]) => `<button data-v="${v}" class="${F[k] === v ? 'on' : ''}">${l}</button>`).join(''); }); }
+document.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const p = b.parentElement;
+  if (p.id === 'langs') { F.lang = b.dataset.l; render(); }
+  else if (p.id === 'cats') { F.cat = b.dataset.v; render(); $('#err').textContent = ''; }
+  else if (p.id === 'pos') { F.pos = F.pos === b.dataset.v ? null : b.dataset.v; render(); }
+  else if (p.id === 'vuln' || p.id === 'needs') { const s = F[p.id]; s.has(b.dataset.v) ? s.delete(b.dataset.v) : s.add(b.dataset.v); render(); }
+  else if (p.classList.contains('seg')) { F[p.dataset.k] = b.dataset.v; render(); } });
+$('#pm').onclick = () => { F.people = Math.max(1, F.people - 1); $('#pv').textContent = F.people; };
+$('#pp').onclick = () => { F.people = Math.min(99, F.people + 1); $('#pv').textContent = F.people; };
+render();
+
+// skip the join animation if the page is reopened mid-session
+try { const saved = sessionStorage.getItem('voidnav_id'); if (saved) { F.id = saved; show('s4'); poll(); } } catch (e) {}
+$('#join').onclick = async () => { show('s2'); const li = [...document.querySelectorAll('#steps li')];
+  for (const [i, l] of li.entries()) { l.classList.add('on'); await sleep(i ? 650 : 1000); l.querySelector('b').textContent = '✓'; }
+  $('#ring').classList.add('ok'); $('#jt').innerHTML = 'Connected<small>SOS Node1</small>'; buzz(80); await sleep(1100); show('s3'); };
+
+// ---------- sound + vibration (allowed after the user's SEND tap) ----------
+let ac = null;
+function tone(seq) { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); let t = ac.currentTime;
+  seq.forEach(([f, d]) => { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; o.frequency.value = f; g.gain.setValueAtTime(.25, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d); t += d + .05; }); } catch (e) {} }
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const flash = c => { const f = $('#flash'); f.style.background = c; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); };
+
+$('#send').onclick = async () => { if (!F.cat) { $('#err').textContent = L[F.lang].pick; return; }
+  tone([[880, .08]]); $('#send').disabled = true;
+  const body = { cat: F.cat, people: F.people, injured: F.injured, bleeding: F.bleeding, pos: F.pos || 'UNKNOWN', vuln: [...F.vuln], needs: [...F.needs], note: $('#note').value.trim(), lang: F.lang };
+  try { const r = await fetch('/api/sos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); const j = await r.json();
+    F.id = j.id; try { sessionStorage.setItem('voidnav_id', j.id); } catch (e) {}
+    $('#summary').textContent = 'You reported: ' + summary(); last = null; seenReplies = 0; $('#replies').innerHTML = '';
+    show('s4'); poll(); }
+  catch (e) { $('#err').textContent = 'Beacon not reachable. Stay connected to SOS Node1 and try again.'; }
+  $('#send').disabled = false; };
+
+const summary = () => { const t = L[F.lang]; return [t.cats[F.cat], F.people > 1 ? F.people + ' ' + t.ppl.toLowerCase() : '', F.injured === 'yes' ? t.inj.replace('?', '') : '', F.pos ? t.pos[F.pos] : '', [...F.needs].map(n => t.needs[n]).join(', ')].filter(Boolean).join(' · '); };
+const ORDER = ['SENDING', 'DELIVERED', 'READ', 'DISPATCHED'];
+let last = null, seenReplies = 0, pt = null;
+async function poll() { clearTimeout(pt); if (!F.id) return;
+  try { const r = await fetch('/api/phone?id=' + F.id); if (r.status === 404) { try { sessionStorage.removeItem('voidnav_id'); } catch (e) {} show('s3'); return; }
+    const j = await r.json(); paint(j); } catch (e) {}
+  pt = setTimeout(poll, 1000); }
+function paint(j) { const st = j.state, idx = st === 'FAILED' ? 0 : ORDER.indexOf(st);
+  $('#sid').textContent = 'SOS ' + j.id; 
+  document.querySelectorAll('.st').forEach((e, i) => { e.classList.toggle('on', i <= idx); e.classList.toggle('cur', i === idx && st !== 'DISPATCHED'); });
+  $('#tryl').textContent = st === 'SENDING' ? `Try ${Math.max(1, j.tries)} of ${j.max} · waiting for command post` : st === 'FAILED' ? `Not delivered yet after ${j.max} tries` : `Delivered on try ${j.tries}`;
+  const H = { SENDING: ['Sending…', 'Keep this page open. The beacon retries until command answers.'], DELIVERED: ['Delivered', 'The command post has your SOS. Stay where you are.'], READ: ['Read by rescuer', 'A person has seen your SOS.'], DISPATCHED: ['Help is on the way', 'Stay where you are. Make noise when you hear the team.'], FAILED: ['Not delivered yet', 'The beacon could not reach command. Tap "Try sending again".'] }[st];
+  $('#headline').firstChild.textContent = H[0]; $('#subline').textContent = H[1];
+  if (j.team) $('#teaml').textContent = j.team + ' is on the way';
+  $('#retry').hidden = st !== 'FAILED';
+  if (last && last !== st) { if (st === 'DELIVERED') { tone([[660, .12], [880, .15]]); buzz(120); flash('#43c6ff'); }
+    if (st === 'READ') { tone([[880, .15], [880, .15], [1175, .3]]); buzz([150, 80, 150]); flash('#ff9f1c'); }
+    if (st === 'DISPATCHED') { tone([[784, .2], [988, .2], [1175, .2], [1568, .5]]); buzz([300, 100, 300, 100, 500]); flash('#2fe08a'); } }
+  last = st;
+  if (j.replies.length > seenReplies) { j.replies.slice(seenReplies).forEach(r => $('#replies').insertAdjacentHTML('beforeend', `<div class="reply"><small>MESSAGE FROM RESCUE COMMAND</small>${r.text.replace(/[<>&]/g, '')}</div>`));
+    if (seenReplies || last) { tone([[1046, .15], [1318, .3]]); buzz([200, 100, 200]); flash('#2fe08a'); } seenReplies = j.replies.length; } }
+$('#retry').onclick = async () => { await fetch('/api/retry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: F.id }) }); poll(); };
+$('#again').onclick = () => { clearTimeout(pt); F.id = null; try { sessionStorage.removeItem('voidnav_id'); } catch (e) {} F.cat = null; F.pos = null; F.vuln.clear(); F.needs.clear(); F.people = 1; $('#pv').textContent = 1; $('#note').value = ''; render(); show('s3'); };
+</script>
+</body></html>
