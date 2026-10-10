@@ -105,14 +105,16 @@ python ai/sos_ai.py "memu 5 mandi illu lo chikkukunnam"    # inspect one predict
 
 The browser statevector reproduces the Qiskit Aer reference run of `quantum/qaoa_relays.py` exactly: P(optimum) is 21.08% for the 8-site, K = 3 demo map. No quantum speed-up is claimed at 8–10 sites; the formulation is what carries over to quantum hardware as maps grow.
 
-**Self-healing test on the planned relays:** SOS messages flow from the farthest survivor group through the chosen relays to the command post, using the firmware's rules:
+**Self-healing (dashboard tab *Self-healing*, continues from the QAOA plan):** SOS messages flow from the farthest survivor group through the chosen relays to the command post, using the firmware's rules:
 - HELLO beacons every 30 s; a neighbour is dropped after 3 missed beacons;
 - each node keeps a hop-count gradient toward the gateway;
 - messages only move closer to the gateway;
 - with no ACK in 2 s, it retries the next-best neighbour;
 - with no route, it stores the message and carries it until one appears.
 
-Click a relay to destroy it and watch the route re-form. Click it again to restore it.
+Click a relay to destroy it and watch the route re-form; click it again to restore it. **Run disaster scenario** destroys the relay on the original route at 150 s and a second relay at 330 s, then repairs the second one at 520 s.
+
+A fixed route on the same relays runs alongside for comparison. In our runs, self-healing delivered **40/40 SOS** and the fixed route **6/40**. While the survivors' node was cut off, its SOS were stored, then all delivered when a relay came back. Hop counts longer than the network are treated as "no route", which prevents count-to-infinity loops.
 
 ### Running the planner in Qiskit
 

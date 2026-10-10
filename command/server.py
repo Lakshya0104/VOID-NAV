@@ -543,12 +543,12 @@ if __name__ == "__main__":
         input("Press Enter to exit"); sys.exit(1)
     print("=" * 66)
     if live:
-        print("  VOID-NAV command v7 · 10-Oct · LIVE: SOS Node1 (ESP32) on USB")
+        print("  VOID-NAV command v8 · 10-Oct · LIVE: SOS Node1 (ESP32) on USB")
         print(f"  Dashboard on this laptop : http://localhost:{a.port}/command")
         print("  Survivor phone           : join Wi-Fi \"SOS Node1\", open http://192.168.4.1")
         print("  (the laptop does NOT need to join SOS Node1; the ESP32 talks over the USB cable)")
     else:
-        print("  VOID-NAV command v7 · 10-Oct · EMULATED link (no ESP32)")
+        print("  VOID-NAV command v8 · 10-Oct · EMULATED link (no ESP32)")
         print(f"  Dashboard : http://localhost:{a.port}/command")
         print("  Survivor SOS page (phone on the same hotspot/Wi-Fi):")
         for x in all_ips():

@@ -179,11 +179,21 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{text-align:left;p
 .qk{border-color:var(--vio)!important;color:#d6c8ff;font-weight:800}
 .qklog{font:11px/1.6 var(--m);color:var(--mut);background:#0b111c;border-radius:10px;padding:10px;margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto}
 .qkh{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.qkh b{color:var(--vio)}
+#healing.on{display:block}#hmap{border-radius:16px;border:1px solid var(--line);min-height:500px;height:calc(100vh - 100px)}
+.rules{margin:0;padding-left:20px;display:grid;gap:6px;font-size:13px;color:var(--mut);line-height:1.45}.rules b{color:var(--fg)}
+.rules li.hot{animation:hot 1.6s}@keyframes hot{0%{background:rgba(67,198,255,.35);color:#fff}100%{background:transparent}}
+.rb{font-style:normal;font-weight:700;color:#0b111c;background:var(--cyan);border-radius:4px;padding:0 5px;margin:0 6px}
+.hss .wide2{grid-column:1/-1}
+.hn{position:absolute;transform:translate(-16px,-16px);display:flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer}
+.hn b{width:32px;height:32px;border-radius:50%;background:#0d1420;border:3px solid var(--c);display:grid;place-items:center;font:800 12px var(--m);color:#fff;box-shadow:0 0 14px var(--c)}
+.hn span{font:700 11px var(--m);color:var(--c);background:rgba(7,11,19,.85);border-radius:5px;padding:2px 6px}
+.hn.dead b{background:#3a0d16;box-shadow:none}
+.qt tr.dd td{color:var(--red);text-decoration:line-through}
 </style></head><body>
 <div id="sound"><div><h2>VOID-NAV Command</h2><p>Click to start the console. This enables the alarm sound and voice alerts for critical SOS.</p><button class="pri" id="go">Start console</button></div></div>
 <header>
-  <div class="brand"><b>VOID-NAV</b><span>RESCUE COMMAND · MUSHEERABAD · v7 · 10-Oct</span></div>
-  <nav id="nav"><button data-t="inbox" class="on">SOS Inbox<span class="n" id="nUnread" hidden>0</span></button><button data-t="map">Map</button><button data-t="relays">Relays · QAOA</button></nav>
+  <div class="brand"><b>VOID-NAV</b><span>RESCUE COMMAND · MUSHEERABAD · v8 · 10-Oct</span></div>
+  <nav id="nav"><button data-t="inbox" class="on">SOS Inbox<span class="n" id="nUnread" hidden>0</span></button><button data-t="map">Map</button><button data-t="relays">Relays · QAOA</button><button data-t="healing">Self-healing</button></nav>
   <div class="sp"></div>
   <div class="link" id="link"><i></i><span id="linkTxt">LoRa link</span> <span class="tag t-emu" id="modeTag">EMULATED</span></div>
   <button id="plug" class="warn">Unplug gateway</button>
@@ -228,12 +238,35 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{text-align:left;p
       <div class="row2"><button class="pri big2" id="pRun" style="margin:0">⚛ Find relays (live, in browser)</button><button class="big2 qk" id="pQiskit" style="margin:0">Run in Qiskit Aer</button></div>
       <div class="mut sm" id="pStatus">Load sample rooftops and import survivors, or place your own.</div>
       <div id="pAnswer"></div><div id="pOut"></div><div id="qkOut"></div>
-      <div class="lbl2">3 · Self-healing relay test</div>
-      <button id="hsRun" disabled>▶ Run self-healing on this plan</button>
-      <div class="mut sm">SOS flow from the farthest survivor group through the planned relays to the command post. Click a relay on the map to destroy it and watch the route heal; click again to restore.</div>
-      <div class="hss" id="hsStats"></div><div class="hsl" id="hsLog"></div>
+      <div class="lbl2">3 · Next</div>
+      <button id="hsRun" class="big2" disabled>Continue → Self-healing test on these relays</button>
     </div>
     <div id="pmap"></div>
+  </div>
+</section>
+<section class="tab" id="healing">
+  <div class="rp">
+    <div class="panel rpl">
+      <h3>Self-healing relay network</h3>
+      <p class="mut" id="hIntro"></p>
+      <div class="row2"><button class="pri" id="hPlay">▶ Start</button><button id="hAuto">Run disaster scenario</button><button id="hReset">Reset</button></div>
+      <div class="row2"><button id="hKill">✕ Destroy relay on live route</button><button id="hRevive">↺ Restore relay</button></div>
+      <div class="mut sm">Or click any relay on the map to destroy / restore it.</div>
+      <div class="hss" id="hStats"></div>
+      <div class="lbl2">How it heals · rules running in every node</div>
+      <ol class="rules" id="hRules">
+        <li data-r="1"><b>HELLO beacon</b> every 30 s: “I am N hops from the gateway”.</li>
+        <li data-r="2"><b>Neighbour table</b>: a neighbour silent for 3 beacons (90 s) is dropped.</li>
+        <li data-r="3"><b>Gradient</b>: my hops = best live neighbour + 1. The network rebuilds its own map.</li>
+        <li data-r="4"><b>Closer-only forwarding</b>: hand the SOS to a neighbour with fewer hops; it must ACK.</li>
+        <li data-r="5"><b>No ACK in 2 s</b>: retry the next-best neighbour. Routes change without any central control.</li>
+        <li data-r="6"><b>Store and carry</b>: no route at all → keep the SOS, forward it the moment a route returns. Nothing is dropped.</li>
+      </ol>
+      <div class="mut sm">Orange dashed line = fixed route (no healing) on the same relays, for comparison. Blue = live route.</div>
+      <div class="lbl2">Node tables</div><table class="qt" id="hTable"></table>
+      <div class="lbl2">Event log</div><div class="hsl" id="hLog"></div>
+    </div>
+    <div id="hmap"></div>
   </div>
 </section>
 <section class="tab" id="lab">
@@ -259,4 +292,5 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{text-align:left;p
 <div id="scm" hidden><div class="scw panel"><div class="sch"><b>⚡ Semantic compression · this SOS, real numbers</b><button id="scClose">Close</button></div><div id="scBody"></div></div></div>
 <script type="module" src="command.js"></script>
 <script type="module" src="planner.js"></script>
+<script type="module" src="heal.js"></script>
 </body></html>

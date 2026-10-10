@@ -38,8 +38,7 @@ function draw() { if (!pmap) return; const R = +$('#pRange').value;
   P.sites.forEach((s, i) => { const on = chosen.has(i);
     if (on) L.circle(s, { radius: R, color: '#a991ff', weight: 2, dashArray: '6 6', fillColor: '#a991ff', fillOpacity: .08, interactive: false }).addTo(P.L.cov);
     L.marker(s, { icon: L.divIcon({ className: '', html: `<div class="ps ${on ? 'on' : ''}" data-site="${i}">${i}</div>`, iconSize: [0, 0] }) })
-      .on('click', () => { if (H.on && on) { const id = 'R' + i; H.alive[id] = !H.alive[id]; hlog(`${id} ${H.alive[id] ? 'restored' : 'DESTROYED'}`); } })
-      .on('contextmenu', () => { if (H.on) return; P.sites.splice(i, 1); P.plan = null; draw(); }).addTo(P.L.sites); });
+      .on('contextmenu', () => { P.sites.splice(i, 1); P.plan = null; draw(); }).addTo(P.L.sites); });
   L.marker(P.cp, { icon: L.divIcon({ className: '', html: '<div class="pcp"><b>⌂</b><span>Command post · gateway</span></div>', iconSize: [0, 0] }) }).addTo(P.L.cp);
   if (P.plan) P.plan.links.forEach(([a, b]) => L.polyline([a, b], { color: '#2fe08a', weight: 2, opacity: .8 }).addTo(P.L.links));
   $('#pCounts').textContent = `${P.sites.length} candidate sites · ${P.groups.length} survivor groups · ${P.groups.reduce((a, g) => a + g.n, 0)} people`;
@@ -105,47 +104,11 @@ function renderRows(rows, total, all, target, layers) { const n = P.sites.length
     <div class="qmeta">${n} qubits (one per site) · Dicke start state · ${layers} QAOA layer${layers > 1 ? 's' : ''} (RZ + RZZ cost, RXX+RYY ring mixer) · exact statevector, ${1 << n} amplitudes · angles optimised live by Nelder-Mead · last K: γ=[${last.gammas.map(x => x.toFixed(2))}] β=[${last.betas.map(x => x.toFixed(2))}]</div>
     <svg viewBox="0 0 300 70" class="conv">${last.curve.length > 1 ? `<polyline fill="none" stroke="#a991ff" stroke-width="2" points="${last.curve.map((v, i) => `${i / (last.curve.length - 1) * 296 + 2},${68 - v * 64}`).join(' ')}"/>` : ''}<text x="4" y="12" fill="#8b9ab2" font-size="9">expected coverage while optimising (K=${last.k})</text></svg>`; }
 
-// ---------- self-healing relay simulation on the planned relays ----------
-const H = { on: false };
-function stopSim() { H.on = false; $('#hsRun') && ($('#hsRun').textContent = '▶ Run self-healing on this plan'); if (P.L.sim) P.L.sim.clearLayers(); }
-$('#hsRun').onclick = () => { if (H.on) return stopSim(); if (!P.plan?.chosen?.length) return; startSim(); };
-function startSim() {
-  const LR = P.plan.LR, relays = P.plan.chosen.map(i => ({ id: 'R' + i, ll: P.sites[i] }));
-  // survivor node: the survivor group farthest from the command post (hardest to reach)
-  const far = P.groups.reduce((a, g) => dist(g.ll, P.cp) > dist(a.ll, P.cp) ? g : a, P.groups[0]);
-  const N = [{ id: 'S', ll: far.ll }, ...relays, { id: 'G', ll: P.cp }];
-  const link = (a, b) => dist(a.ll, b.ll) <= LR;   // rescuer node, relays and gateway all use the same LoRa radio
-  Object.assign(H, { on: true, t: 0, N, link, alive: Object.fromEntries(N.map(n => [n.id, true])), hops: Object.fromEntries(N.map(n => [n.id, n.id === 'G' ? 0 : 99])),
-    heard: Object.fromEntries(N.map(n => [n.id, {}])), nb: Object.fromEntries(N.map(n => [n.id, Math.random() * 30])), msgs: [], sent: 0, del: 0, next: 5, log: [] });
-  $('#hsRun').textContent = '⏸ Stop'; $('#hsLog').innerHTML = ''; let last = performance.now();
-  const tick = now => { if (!H.on) return; const dt = Math.min(.1, (now - last) / 1000) * 30; last = now; for (let i = 0; i < 6; i++) step(dt / 6); drawSim(); requestAnimationFrame(tick); };
-  requestAnimationFrame(tick);
-}
-function step(dt) { H.t += dt; const t = H.t, N = H.N, byId = Object.fromEntries(N.map(n => [n.id, n]));
-  for (const n of N) if (H.alive[n.id] && t >= H.nb[n.id]) { H.nb[n.id] = t + 30 + (Math.random() * 10 - 5); for (const m of N) if (m !== n && H.alive[m.id] && H.link(n, m)) H.heard[m.id][n.id] = [t, H.hops[n.id]]; }
-  for (const n of N) { if (n.id === 'G' || !H.alive[n.id]) continue; const live = Object.entries(H.heard[n.id]).filter(([, [ts]]) => t - ts <= 90); H.heard[n.id] = Object.fromEntries(live); H.hops[n.id] = live.length ? 1 + Math.min(...live.map(([, [, h]]) => h)) : 99; }
-  if (t >= H.next) { H.next += 20; H.sent++; H.msgs.push({ at: 'S', to: null, busy: 0, born: t }); }
-  for (const m of H.msgs) { if (m.busy > t) continue;
-    if (m.to) { if (H.alive[m.to]) m.at = m.to; else { delete H.heard[m.at][m.to]; hlog(`no ACK from ${m.to} → trying next-best neighbour`); } m.to = null; }
-    if (m.at === 'G') { m.done = true; H.del++; continue; }
-    const c = Object.entries(H.heard[m.at] || {}).filter(([, [ts, h]]) => t - ts <= 90 && h < H.hops[m.at]).sort((a, b) => a[1][1] - b[1][1]);
-    if (!c.length || !H.alive[m.at]) continue;                       // store and carry
-    m.to = c[0][0]; m.busy = t + (H.alive[m.to] ? .3 : 2); }
-  H.msgs = H.msgs.filter(m => !m.done); }
-function hlog(s) { const last = H.log[H.log.length - 1]; if (last === s) return; H.log.push(s); $('#hsLog').insertAdjacentHTML('afterbegin', `<div><span>t=${Math.round(H.t)}s</span> ${esc(s)}</div>`); }
-function drawSim() { const g = P.L.sim; g.clearLayers(); const N = H.N, byId = Object.fromEntries(N.map(n => [n.id, n]));
-  // current best route
-  const route = ['S']; let c = 'S', guard = 0; while (c !== 'G' && guard++ < 12) { const nx = Object.entries(H.heard[c] || {}).filter(([, [ts, h]]) => H.t - ts <= 90 && h < H.hops[c]).sort((a, b) => a[1][1] - b[1][1])[0]; if (!nx) break; c = nx[0]; route.push(c); }
-  for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) if (H.link(N[i], N[j])) { const dead = !H.alive[N[i].id] || !H.alive[N[j].id]; L.polyline([N[i].ll, N[j].ll], { color: dead ? '#5a2030' : '#2b4a6a', weight: 1.5, dashArray: '4 6', interactive: false }).addTo(g); }
-  for (let i = 0; i < route.length - 1; i++) L.polyline([byId[route[i]].ll, byId[route[i + 1]].ll], { color: '#43c6ff', weight: 5, opacity: .9, interactive: false }).addTo(g);
-  for (const n of N) L.circleMarker(n.ll, { radius: n.id.length === 1 ? 11 : 9, color: !H.alive[n.id] ? '#ff3b5c' : n.id === 'S' ? '#ff9f1c' : n.id === 'G' ? '#2fe08a' : '#43c6ff', weight: 3, fillColor: '#0d1420', fillOpacity: 1 })
-    .bindTooltip(n.id === 'S' ? 'Rescuer node at survivors' : n.id === 'G' ? 'Command post' : `${n.id} · ${H.alive[n.id] ? H.hops[n.id] < 99 ? H.hops[n.id] + ' hops · click to destroy' : 'no route' : 'DESTROYED · click to restore'}`)
-    .on('click', () => { if (n.id[0] !== 'R') return; H.alive[n.id] = !H.alive[n.id]; hlog(`${n.id} ${H.alive[n.id] ? 'restored' : 'destroyed'}`); }).addTo(g);
-  for (const m of H.msgs) { const a = byId[m.at].ll, b = m.to ? byId[m.to].ll : a, k = m.to ? Math.max(0, Math.min(1, 1 - (m.busy - H.t) / .3)) : 0;
-    L.circleMarker([a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k], { radius: 5, color: '#fff', weight: 1, fillColor: '#ff3b5c', fillOpacity: 1, interactive: false }).addTo(g); }
-  $$('#pmap .ps.on').forEach(e => e.classList.toggle('dead', H.alive['R' + e.dataset.site] === false));
-  const stored = H.msgs.filter(m => !m.to).length;
-  $('#hsStats').innerHTML = `<div><b>${H.del} / ${H.sent}</b>SOS delivered</div><div><b>${stored}</b>stored at a node (no route yet)</div><div><b>${route.join(' → ')}</b>current route</div><div><b>${Math.round(H.t)} s</b>simulated time (30×)</div>`; }
+// ---------- hand the plan to the Self-healing tab ----------
+function stopSim() {}
+$('#hsRun').onclick = () => { if (!P.plan?.chosen?.length) return;
+  window.VOIDNAV_PLAN = { relays: P.plan.chosen.map(i => ({ id: 'R' + i, ll: P.sites[i] })), cp: P.cp, groups: P.groups, R: P.plan.R || +$('#pRange').value, LR: P.plan.LR || +$('#pRange').value * 3, k: P.plan.k };
+  document.querySelector('#nav [data-t="healing"]').click(); };
 
 // open the tab
 document.querySelector('#nav').addEventListener('click', e => { if (e.target.closest('[data-t="relays"]')) setTimeout(init, 40); });
