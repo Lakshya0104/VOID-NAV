@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>VOID-NAV Win Playbook</title>
+<style>
+@page { size: A4; margin: 14mm 14mm 14mm 14mm; } @page :first { margin: 0; }
+:root { --ink:#0f1a2a; --muted:#56637a; --line:#dde3ec; --bg2:#f3f6fa; --night:#0b1320; --night2:#17243a;
+  --orange:#e8590c; --orange-bg:#fff1e8; --teal:#13897d; --teal-bg:#e7f6f3; --blue:#2b7bb9; --gold:#b8860b; --red:#c92a2a; --red-bg:#fff0f0; }
+* { box-sizing: border-box; }
+body { margin:0; font: 9.5pt/1.42 "Carlito","Inter",Arial,sans-serif; color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+h1,h2,h3 { font-family: "Caladea","DejaVu Serif",Georgia,serif; line-height:1.15; margin:0; color: var(--ink); }
+h2 { font-size: 19pt; margin: 0 0 3mm; }
+h3 { font-size: 12pt; margin: 3.5mm 0 1.5mm; }
+p { margin: 0 0 2.4mm; }
+ul, ol { margin: 0 0 2.4mm; padding-left: 5mm; } li { margin: 0 0 1mm; }
+code, .mono { font-family: "DejaVu Sans Mono", monospace; font-size: 8.6pt; }
+pre { font: 8.4pt/1.45 "DejaVu Sans Mono", monospace; background: var(--night); color: #e8eef8; padding: 3mm 4mm; border-radius: 2mm; margin: 0 0 3mm; white-space: pre-wrap; }
+.page { page-break-after: always; }
+.page:last-child { page-break-after: auto; }
+.eyebrow { font: 700 7.6pt "DejaVu Sans Mono", monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--orange); margin-bottom: 2mm; }
+.lede { font-size: 11.5pt; color: var(--muted); margin-bottom: 4mm; }
+table { width: 100%; border-collapse: collapse; margin: 0 0 3mm; font-size: 8.6pt; page-break-inside: avoid; } table.qa { page-break-inside: auto; } tr { page-break-inside: avoid; }
+th { text-align: left; font: 700 7.2pt "DejaVu Sans Mono", monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1.4pt solid var(--ink); padding: 1.6mm 2mm; }
+td { border-bottom: .5pt solid var(--line); padding: 1.2mm 1.8mm; vertical-align: top; }
+tr.hl td { background: var(--orange-bg); font-weight: 700; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; }
+.card { background: var(--bg2); border-radius: 2.5mm; padding: 3.5mm 4mm; page-break-inside: avoid; }
+.card h3 { margin-top: 0; }
+.warn { background: var(--orange-bg); border-radius: 2.5mm; padding: 3mm 4mm; margin: 0 0 3.5mm; page-break-inside: avoid; }
+.bad { background: var(--red-bg); border-radius: 2.5mm; padding: 3mm 4mm; margin: 0 0 3.5mm; page-break-inside: avoid; }
+.good { background: var(--teal-bg); border-radius: 2.5mm; padding: 3mm 4mm; margin: 0 0 3.5mm; page-break-inside: avoid; }
+.say { border-left: 0; background: var(--night); color: #fff; border-radius: 2.5mm; padding: 3mm 4mm; margin: 0 0 3mm; font-family: "Caladea", serif; font-size: 10.5pt; page-break-inside: avoid; }
+.say b { color: #ffb08a; }
+.stat { font: 700 24pt "Caladea", serif; color: var(--orange); line-height: 1; }
+.stat + div { color: var(--muted); font-size: 8.8pt; margin-top: 1.5mm; }
+figure { margin: 0 0 3mm; page-break-inside: avoid; } figure img { width: 100%; max-height: 60mm; object-fit: contain; display: block; }
+figcaption { font-size: 8.4pt; color: var(--muted); margin-top: 1mm; }
+.tag { display: inline-block; font: 700 7pt "DejaVu Sans Mono", monospace; padding: .6mm 1.8mm; border-radius: 1mm; letter-spacing: .04em; }
+.real { background: var(--teal-bg); color: var(--teal); } .sim { background: #eef0ff; color: #4b4fc4; } .mock { background: var(--orange-bg); color: var(--orange); } .no { background: var(--red-bg); color: var(--red); }
+.cover { background: var(--night); color: #fff; margin: 0; padding: 26mm 18mm 18mm; height: 296mm; display: flex; flex-direction: column; }
+.cover h1 { color: #fff; font-size: 52pt; letter-spacing: -.01em; }
+.cover .sub { font-size: 15pt; color: #9fe3da; margin: 4mm 0 10mm; font-family: "Caladea", serif; max-width: 150mm; }
+.cover .eyebrow { color: #ff9a66; }
+.cover .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; margin-top: auto; }
+.cover .stats > div { background: var(--night2); border-radius: 3mm; padding: 5mm; }
+.cover .stats .stat { color: #ff8a4c; font-size: 30pt; } .cover .stats .stat + div { color: #b9c4d6; }
+.toc { columns: 2; column-gap: 8mm; margin-top: 8mm; color: #c9d2de; font-size: 10pt; }
+.toc div { margin-bottom: 1.6mm; break-inside: avoid; } .toc b { color: #ff9a66; font-family: "DejaVu Sans Mono", monospace; font-size: 8pt; margin-right: 2mm; }
+.flow { display: flex; flex-wrap: wrap; gap: 1.5mm; align-items: center; font: 8.2pt "DejaVu Sans Mono", monospace; margin: 0 0 3.5mm; }
+.flow span { background: var(--bg2); border: .5pt solid var(--line); border-radius: 5mm; padding: 1.2mm 3mm; } .flow i { color: var(--muted); font-style: normal; }
+.small { font-size: 8.6pt; color: var(--muted); }
+.qa td:first-child { width: 30%; font-weight: 700; } .qa { font-size: 7.9pt; } .qa td { padding: 1mm 1.6mm; }
+.script td:first-child { width: 13mm; font-family: "DejaVu Sans Mono", monospace; font-size: 8.2pt; color: var(--orange); font-weight: 700; }
+.script td:nth-child(2) { width: 22mm; font-weight: 700; }
+.foot { font-size: 7.6pt; color: var(--muted); }
+svg text { font-family: "Carlito", Arial, sans-serif; }
+</style></head><body>
+
+<!-- COVER -->
+<section class="page"><div class="cover">
+  <div class="eyebrow">Tech Horizon 2.0 · Next Generation Communication · Team VOID</div>
+  <h1>VOID-NAV</h1>
+  <div class="sub">An instant private network that rescuers carry in. The phone a survivor already has becomes a beacon, and they get proof that help has read their SOS and is coming.</div>
+  <div style="font-size:11pt;color:#c9d2de;max-width:160mm">The win playbook: what we build, what we prove, what we demo, and every hard question we expect. Every number in this document was measured by running our own code. Where something is simulated or mock data, it says so.</div>
+  <div class="toc">
+    <div><b>01</b>Our one scenario</div><div><b>02</b>What disaster tech exists today</div>
+    <div><b>03</b>Architecture with 2 ESP32 + 2 LoRa</div><div><b>04</b>Survivor ↔ rescuer loop: who sees what</div>
+    <div><b>05</b>Pillar 1: semantic compression</div><div><b>06</b>Pillar 2: priority-aware self-healing relay</div>
+    <div><b>07</b>Pillar 3: quantum relay planning (QAOA)</div><div><b>08</b>Quantum: step-by-step run guide</div>
+    <div><b>09</b>Command dashboard and data storage</div><div><b>10</b>Tech stack</div>
+    <div><b>11</b>The 4-minute demo script</div><div><b>12</b>Setup, roles and backups</div>
+    <div><b>13</b>Judge Q&amp;A</div><div><b>14</b>Standing out among 290 teams</div>
+    <div><b>15</b>Business model and roadmap</div><div><b>16</b>Real vs simulated, build order, sources</div>
+  </div>
+  <div class="stats">
+    <div><div class="stat">−70%</div><div>LoRa airtime per SOS with a 5-byte semantic token instead of free text (165 ms vs 554 ms at SF9)</div></div>
+    <div><div class="stat">100%</div><div>SOS delivered in the self-healing relay simulation with relays destroyed, vs 24% on a fixed route (119 sent)</div></div>
+    <div><div class="stat">6×</div><div>QAOA (XY mixer, p = 3) samples the optimal relay plan 21% of the time vs 3.6% for a random valid plan</div></div>
+  </div>
+</div></section>
+
+<!-- 01 SCENARIO -->
+<section class="page">
+  <div class="eyebrow">01 · Scope</div>
+  <h2>We solve one scenario, and solve it completely</h2>
+  <p class="lede">A person is trapped or stranded after a disaster. Towers and power are down. They still have a phone with some battery. A rescue team arrives in the area with a VOID-NAV kit.</p>
+  <div class="flow"><span>📱 Survivor's own phone</span><i>Wi-Fi →</i><span>Beacon node (ESP32 + LoRa)</span><i>~ LoRa, multi-hop ~</i><span>Command gateway</span><i>USB →</i><span>💻 Rescue dashboard</span><i>← status back</i></div>
+  <div class="grid2">
+    <div class="card"><h3>What the survivor does</h3><ol><li>Sees an open Wi-Fi called <b>VOID-NAV SOS</b>, from awareness drills, the official alert SMS, or a rescuer shouting.</li><li>Joins it. An SOS page opens by itself, with no app, SIM or internet.</li><li>Taps what's wrong, the number of people, and optionally a short note.</li><li>Hears and sees the replies: <b>Delivered → Read by rescuer → Help dispatched</b>.</li></ol></div>
+    <div class="card"><h3>What the rescue team does</h3><ol><li>Drops a beacon node near the affected building or area.</li><li>Relays, placed by the quantum planner, carry messages back to the command post.</li><li>Command sees the SOS live, sorted by urgency, and taps <b>Read</b> and then <b>Dispatch</b>.</li><li>The status travels back over LoRa to the survivor's phone and the node's lights.</li></ol></div>
+  </div>
+  <h3>How this maps to the problem statement</h3>
+  <table><tr><th>Problem statement asks</th><th>VOID-NAV answer</th><th>Proof we show</th></tr>
+    <tr><td>Communicate without cellular or internet</td><td>Phone → local Wi-Fi → LoRa, with no infrastructure anywhere</td><td><span class="tag real">REAL</span> live hardware</td></tr>
+    <tr><td>Relay across changing connectivity and limited bandwidth</td><td>Priority-aware store-and-forward, self-healing relays, 5-byte semantic token</td><td><span class="tag real">REAL</span> 1 LoRa hop · <span class="tag sim">SIM</span> multi-hop and healing</td></tr>
+    <tr><td>Dependable delivery and status information</td><td>Hop and end-to-end acknowledgements and retries; Delivered / Read / Dispatched shown to the survivor</td><td><span class="tag real">REAL</span> LEDs and phone page update over LoRa</td></tr>
+    <tr><td>Evaluation under simulated outages</td><td>66-node simulator with 0–50% nodes destroyed plus a blackout; relay-kill simulator</td><td><span class="tag sim">SIM</span> charts in sections 6–7</td></tr>
+    <tr><td>Reliability, latency, resilience analysis</td><td>Delivery %, median SOS latency, transmissions per delivery, re-route time</td><td><span class="tag sim">SIM</span> measured numbers</td></tr></table>
+  <h3>What we deliberately do not solve</h3>
+  <table><tr><th>Case</th><th>Why not</th><th>Who handles it</th></tr>
+    <tr><td>Phone off, dead, airplane mode, or no phone</td><td>Nothing transmits, so no network can hear it</td><td>The <b>push button on the beacon node</b> (one-press SOS), search dogs, radar, thermal cameras</td></tr>
+    <tr><td>Unconscious survivor</td><td>Cannot send a message</td><td>Search instruments. Their findings can be sent over our network.</td></tr>
+    <tr><td>Finding phones that are not connected</td><td>Needs a scanner we don't have, and phones randomise their identity</td><td>Roadmap: passive Wi-Fi/BLE presence counter, never identifying people</td></tr>
+    <tr><td>Voice and video calls</td><td>LoRa carries about 1.8 kbit/s, which is far too slow</td><td>Not needed for SOS: the meaning fits in 5 bytes</td></tr></table>
+  <div class="say">"We don't try to save everyone with one gadget. We take the device <b>already in every pocket</b> and turn it into a beacon that gets an answer back, within minutes of a rescuer arriving."</div>
+</section>
+
+<!-- 02 LANDSCAPE -->
+<section class="page">
+  <div class="eyebrow">02 · Research</div>
+  <h2>What disaster communication exists today, and the gap</h2>
+  <table>
+    <tr><th>Technology</th><th>What it solves</th><th>Gap VOID-NAV fills</th></tr>
+    <tr><td><b>Cell Broadcast / SACHET</b> (India, CAP-based; nationwide launch reported May 2026)</td><td>Authorities push warnings to every phone in an area</td><td>One-way, and needs live towers. Survivors can't reply after towers fall.</td></tr>
+    <tr><td><b>Satellite SOS on phones</b> (iPhone, some Android)</td><td>SOS to a call centre under open sky</td><td>Reported as not yet available in India. Needs recent phones and open sky (not rubble or indoors), and routes to a remote centre rather than the local team.</td></tr>
+    <tr><td><b>Satellite handsets</b> (e.g. BSNL Inmarsat handset ≈ ₹1.34 lakh)</td><td>Voice and data for responders</td><td>Responders only, too costly for survivors. ≈100 VOID-NAV nodes cost the same as one handset.</td></tr>
+    <tr><td><b>Meshtastic</b> (hobbyist LoRa mesh)</td><td>Off-grid text between people who own devices; used by communities around hurricanes</td><td>Everyone needs a device and app set up beforehand. A chat tool with no rescue workflow or dispatch status.</td></tr>
+    <tr><td><b>Project OWL / ClusterDuck</b> (IBM Call for Code 2018 winner)</td><td>LoRa "ducks" plus Wi-Fi portal; ~30 solar nodes in Puerto Rico</td><td>Closest to us. Early field tests delivered only about half the messages. Survivors get no "read / dispatched" loop. Cloud-oriented.</td></tr>
+    <tr><td><b>goTenna and similar mesh radios</b></td><td>Peer messaging between device owners</td><td>Each person needs a device</td></tr>
+    <tr><td><b>LoRa "rescue watches" or wearables</b></td><td>One-button SOS with long range</td><td>Must be owned and worn before the disaster, which costs a device per citizen. It could be an input to our network.</td></tr>
+    <tr><td><b>Radar, thermal, dogs</b> (e.g. NASA JPL FINDER)</td><td>Detect living people under rubble</td><td>Detection only, so you can't learn needs or headcount. Complements us.</td></tr>
+  </table>
+  <div class="warn"><b>Honest read of our own track:</b> many teams will say "LoRa mesh for disasters". LoRa mesh is the plumbing and it is not new, so name Meshtastic and Project OWL before a judge does. Our difference is <b>(1)</b> any phone with no app, <b>(2)</b> a closed loop where the survivor learns it was read and that help is coming, <b>(3)</b> measured numbers for bandwidth, resilience and planning, and <b>(4)</b> a working hardware demo.</div>
+  <h3>The comparison slide that wins the "why you" question</h3>
+  <table>
+    <tr><th>Capability</th><th>Sat SOS</th><th>Meshtastic</th><th>ClusterDuck</th><th>Rescue watch</th><th>VOID-NAV</th></tr>
+    <tr><td>Uses the survivor's existing phone, no app</td><td>Some phones</td><td>✗</td><td>✓</td><td>✗</td><td>✓</td></tr>
+    <tr><td>Works with zero internet end to end</td><td>✓ (via satellite)</td><td>✓</td><td>Partly</td><td>✓</td><td>✓</td></tr>
+    <tr><td>Survivor sees Read and Dispatched</td><td>Partial</td><td>✗</td><td>✗</td><td>Limited</td><td>✓</td></tr>
+    <tr><td>Rescue dispatch workflow built in</td><td>Remote centre</td><td>✗</td><td>Cloud</td><td>✗</td><td>✓ local</td></tr>
+    <tr><td>Priority for life-safety traffic</td><td>—</td><td>✗</td><td>✗</td><td>—</td><td>✓</td></tr>
+    <tr class="hl"><td>Cost to cover an area</td><td>Phone-dependent</td><td>Device per person</td><td>Nodes</td><td>Device per person</td><td>Nodes carried by rescuers</td></tr>
+  </table>
+  <p class="small">Sources at the end of this document. Availability claims, such as satellite SOS in India and the cell broadcast launch, come from news reports. Re-check them on the day.</p>
+</section>
+
+<!-- 03 ARCHITECTURE -->
+<section class="page">
+  <div class="eyebrow">03 · Architecture</div>
+  <h2>Two ESP32s, two radios, one closed loop</h2>
+  <p class="lede">With the second ESP32 we get two independent radio nodes. That is enough for a real over-the-air LoRa link in both directions with separate boards across the room. A third radio would be needed for a physical relay, so the relay chain is shown in the simulator using the same rules.</p>
+  <svg viewBox="0 0 700 250" width="100%" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="40" width="120" height="150" rx="10" fill="#f3f6fa" stroke="#dde3ec"/>
+    <text x="65" y="62" text-anchor="middle" font-size="13" font-weight="700">Survivor phone</text>
+    <text x="65" y="84" text-anchor="middle" font-size="10" fill="#56637a">joins "VOID-NAV SOS"</text>
+    <text x="65" y="100" text-anchor="middle" font-size="10" fill="#56637a">SOS page (captive portal)</text>
+    <text x="65" y="116" text-anchor="middle" font-size="10" fill="#56637a">status + alarm sound</text>
+    <rect x="25" y="135" width="80" height="40" rx="6" fill="#0b1320"/><text x="65" y="152" text-anchor="middle" font-size="9" fill="#fff">Read ✓✓</text><text x="65" y="166" text-anchor="middle" font-size="9" fill="#ff9a66">Help on the way</text>
+    <line x1="125" y1="115" x2="175" y2="115" stroke="#2b7bb9" stroke-width="2" stroke-dasharray="5 4"/><text x="150" y="108" text-anchor="middle" font-size="9" fill="#2b7bb9">Wi-Fi</text>
+    <rect x="175" y="25" width="170" height="185" rx="10" fill="#0b1320"/>
+    <text x="260" y="47" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">BEACON NODE · ESP32 #1</text>
+    <text x="260" y="66" text-anchor="middle" font-size="9.5" fill="#c9d2de">dropped by rescuer near survivors</text>
+    <text x="190" y="90" font-size="10" fill="#e8eef8">• Wi-Fi hotspot + SOS page</text>
+    <text x="190" y="106" font-size="10" fill="#e8eef8">• SemCode 5-byte token</text>
+    <text x="190" y="122" font-size="10" fill="#e8eef8">• priority queue + retries</text>
+    <text x="190" y="138" font-size="10" fill="#e8eef8">• push button: no-phone SOS</text>
+    <text x="190" y="154" font-size="10" fill="#e8eef8">• LEDs: orange read, green sent</text>
+    <rect x="190" y="166" width="140" height="30" rx="5" fill="#17243a"/><text x="260" y="186" text-anchor="middle" font-size="10" fill="#9fe3da">LoRa RA-02 (radio A)</text>
+    <line x1="345" y1="181" x2="455" y2="181" stroke="#e8590c" stroke-width="2.5"/><text x="400" y="172" text-anchor="middle" font-size="9.5" fill="#e8590c">LoRa 433 MHz ⇄</text>
+    <text x="400" y="200" text-anchor="middle" font-size="9" fill="#56637a">SOS → · ← ACK, Read, Dispatched</text>
+    <rect x="365" y="70" width="70" height="44" rx="8" fill="#fff" stroke="#4b4fc4" stroke-dasharray="4 3"/><text x="400" y="89" text-anchor="middle" font-size="9.5" fill="#4b4fc4">relays R1…Rn</text><text x="400" y="103" text-anchor="middle" font-size="8.5" fill="#4b4fc4">simulated</text>
+    <rect x="455" y="25" width="120" height="185" rx="10" fill="#0b1320"/>
+    <text x="515" y="47" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">GATEWAY</text>
+    <text x="515" y="63" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">ESP32 #2</text>
+    <text x="515" y="90" text-anchor="middle" font-size="9.5" fill="#c9d2de">dedup · verify</text>
+    <text x="515" y="106" text-anchor="middle" font-size="9.5" fill="#c9d2de">ACK every SOS</text>
+    <text x="515" y="122" text-anchor="middle" font-size="9.5" fill="#c9d2de">JSON over USB</text>
+    <rect x="470" y="166" width="90" height="30" rx="5" fill="#17243a"/><text x="515" y="186" text-anchor="middle" font-size="10" fill="#9fe3da">radio B</text>
+    <line x1="575" y1="115" x2="605" y2="115" stroke="#13897d" stroke-width="2"/><text x="590" y="108" text-anchor="middle" font-size="9" fill="#13897d">USB</text>
+    <rect x="605" y="40" width="90" height="150" rx="10" fill="#f3f6fa" stroke="#dde3ec"/>
+    <text x="650" y="62" text-anchor="middle" font-size="12" font-weight="700">Laptop</text>
+    <text x="650" y="82" text-anchor="middle" font-size="9" fill="#56637a">Python server</text>
+    <text x="650" y="96" text-anchor="middle" font-size="9" fill="#56637a">SQLite</text>
+    <text x="650" y="110" text-anchor="middle" font-size="9" fill="#56637a">Dashboard</text>
+    <text x="650" y="124" text-anchor="middle" font-size="9" fill="#56637a">QAOA planner</text>
+    <text x="650" y="138" text-anchor="middle" font-size="9" fill="#56637a">Mesh simulator</text>
+    <text x="650" y="162" text-anchor="middle" font-size="8.5" fill="#13897d">rescuer phones view</text><text x="650" y="174" text-anchor="middle" font-size="8.5" fill="#13897d">via laptop hotspot</text>
+    <text x="350" y="240" text-anchor="middle" font-size="10" fill="#56637a">No cloud and no internet anywhere. Quantum runs on the laptop for planning, never in the message path.</text>
+  </svg>
+  <h3>Wiring with two boards (firmware already supports it)</h3>
+  <table><tr><th>Board</th><th>Set in code</th><th>Connections</th></tr>
+    <tr><td><b>ESP32 #1 · Beacon node</b></td><td><code>#define ROLE ROLE_NODE</code></td><td>Radio: 3V3, GND, SCK→D18, MISO→D19, MOSI→D23, NSS→D5, RST→D4. LED orange→D21, LED green→D22, button D13↔GND. Power: power bank.</td></tr>
+    <tr><td><b>ESP32 #2 · Gateway</b></td><td><code>#define ROLE ROLE_GATEWAY</code></td><td>Radio with the same pins: 3V3, GND, D18, D19, D23, NSS→D5, RST→D4. No LEDs or button. USB to the command laptop.</td></tr></table>
+  <p class="small">In two-board mode the firmware raises transmit power to 10 dBm. Keep antennas attached before powering on. Place the boards 3–10 m apart for the demo so the link is visibly over the air.</p>
+  <h3>Why this is honest and still impressive</h3>
+  <ul><li>Every SOS, acknowledgement, Read and Dispatch crosses real air between two independent boards. Unplug the gateway antenna and delivery visibly stops; the phone stays at "Sending".</li>
+  <li>Signal strength and signal quality (RSSI and SNR) of every real packet appear on the dashboard, which proves it is not faked.</li>
+  <li>Multi-hop, self-healing and scale are shown in simulators that use the same packet rules, and are labelled <span class="tag sim">SIMULATED</span> on screen.</li></ul>
+</section>
+
+<!-- 04 LOOP -->
+<section class="page">
+  <div class="eyebrow">04 · Who sees what</div>
+  <h2>The survivor ↔ rescuer loop, explained simply</h2>
+  <div class="warn"><b>Clearing up the confusion:</b> the push button and LEDs live on the <b>beacon node</b>, the box the rescuer drops <i>near the survivors</i>. They are not on the rescuer's side. Pressing the button <b>sends</b> an SOS to command; it does not send anything to survivors. Survivors see status on <b>their own phone</b> (with sound) and on the node's LEDs.</div>
+  <table><tr><th>Thing</th><th>Where it is</th><th>Who uses it</th><th>What it does</th></tr>
+    <tr><td>SOS web page</td><td>Served by the beacon node over Wi-Fi</td><td>Survivor</td><td>Send SOS; shows Sending → Delivered → Read → Dispatched; plays an alarm tone and vibrates when the status changes</td></tr>
+    <tr><td>Push button</td><td>Beacon node</td><td>Survivor without a phone, or a rescuer who found someone</td><td>One press sends an SOS ("person at this node, details unknown")</td></tr>
+    <tr><td>Orange LED</td><td>Beacon node</td><td>Survivors near the node</td><td>Fast blink: sending. Slow blink: delivered. Solid: <b>read by rescuer</b></td></tr>
+    <tr><td>Green LED</td><td>Beacon node</td><td>Survivors near the node</td><td>Solid: <b>rescue dispatched</b></td></tr>
+    <tr><td>Dashboard</td><td>Command laptop. Rescuer phones open the same page through the laptop's hotspot.</td><td>Rescue team</td><td>Inbox, map/heatmap, Read and Dispatch, broadcast reply</td></tr></table>
+  <h3>One dashboard, two views</h3>
+  <p>Build <b>one</b> web app served by the laptop, not two separate apps. Desktop width shows the <b>command view</b> (map, heatmap, inbox, simulators, QAOA). A phone opening the same address gets the <b>field view</b> (inbox and Read/Dispatch buttons only). That gives one codebase and one database.</p>
+  <h3>Message states (locked rules)</h3>
+  <div class="flow"><span>Sending (node retries)</span><i>→</i><span>Delivered (gateway ACK)</span><i>→</i><span>UNREAD on dashboard</span><i>→</i><span style="background:#fff1e8">READ · orange</span><i>→</i><span style="background:#e7f6f3">DISPATCHED · green</span></div>
+  <ul><li>Opening a card marks it <b>Read</b>. This cannot be undone in the normal interface.</li><li><b>Dispatch</b> is a separate button with a team name. Reading never implies dispatch.</li><li>Each status is resent over LoRa until the beacon node acknowledges it. If it never arrives, the dashboard shows "status not confirmed at node".</li><li>If an SOS can't be delivered after 8 tries, the phone says <b>"Not delivered yet"</b>. We never pretend.</li></ul>
+  <h3>Audible alert on the survivor's phone</h3>
+  <p>The SOS page plays a loud tone using the browser's Web Audio API and vibrates using the Vibration API when the status becomes Read or Dispatched. Browsers only allow sound after the person has touched the page, and the SEND tap counts as that touch. Vibration works on Android Chrome but not on iPhone, so iPhones get sound and a full-screen colour change. The node can also beep with a ₹10 buzzer later.</p>
+  <h3>Rescuer → survivor broadcast (adds the "conversation")</h3>
+  <p>From the dashboard, command can send a short reply to one SOS or to everyone at a node, such as "Team arriving in 10 minutes, stay where you are". It travels as a coded LoRa message and pops up with the alarm tone on every phone connected to that node. That's a small firmware addition and it makes the demo feel alive.</p>
+  <h3>Hospitals and agencies: needed for the demo?</h3>
+  <p><b>No.</b> Show it as a design answer only. The dashboard is served on the laptop's local Wi-Fi, so an ambulance crew or field hospital nearby opens it on any phone in the viewer role. When any backhaul exists (satellite terminal, surviving fibre, restored cellular), the laptop exports records in CAP format for SACHET or state control rooms and the 108 ambulance service. Label this <span class="tag mock">PROPOSED</span>.</p>
+</section>
+
+<!-- 05 SEMANTIC -->
+<section class="page">
+  <div class="eyebrow">05 · Pillar 1</div>
+  <h2>Semantic compression: send the meaning, not the words</h2>
+  <p class="lede">Semantic communication is a 6G research direction: transmit what a message means instead of every character. For an SOS the meaning is a handful of triage facts. We encode them into a <b>5-byte SemCode token</b> using a codebook both ends share. The receiver expands the token back into a full triage report.</p>
+  <figure><img src="fig/semantic.svg" style="max-height:44mm"><figcaption>Measured with Semtech's SX127x time-on-air formula (SF9, 125 kHz, CR 4/5, explicit header, CRC). All formats include the same 10-byte header (ID, node, type/priority, authentication tag).</figcaption></figure>
+  <div class="grid3">
+    <div class="card"><div class="stat">−85%</div><div>bytes on air: 102 → 15 per SOS (−93% vs a JSON form)</div></div>
+    <div class="card"><div class="stat">−70%</div><div>airtime: 554 ms → 165 ms. Less airtime means fewer collisions and less battery.</div></div>
+    <div class="card"><div class="stat">3.4×</div><div>more SOS per channel-hour (≈1,200 → ≈4,000, peak ALOHA channel use)</div></div>
+  </div>
+  <h3>The 40-bit token (real code: <code>semantic/semcode.py</code>)</h3>
+  <table><tr><th>Field</th><th>Bits</th><th>Values</th></tr>
+    <tr><td>Category</td><td>4</td><td>Trapped, Medical, Fire, Flood, Collapse, Food/Water, Shelter, Safe, Other</td></tr>
+    <tr><td>Injured · Bleeding</td><td>2 + 2</td><td>No / Yes / Unsure</td></tr>
+    <tr><td>People · Position</td><td>3 + 3</td><td>1, 2, 3–5, 6–10, 11–20, 20+ · ground, upper floor, basement, roof, outside, vehicle</td></tr>
+    <tr><td>Vulnerable</td><td>4</td><td>child, elderly, pregnant, disabled (bit flags)</td></tr>
+    <tr><td>Needs</td><td>8</td><td>medical, water, food, evacuation, shelter, rescue tools, medicine, light</td></tr>
+    <tr><td>Urgency · Minutes since event</td><td>4 + 10</td><td>0–15 score · 0–1023</td></tr></table>
+  <p><b>Example, real output.</b> The free text "Trapped in basement with my mother and 2 kids, she is bleeding from leg, need water urgently" plus the form taps becomes token <code>05 4c 88 f8 2a</code>. The dashboard decodes it to: <i>"[CRITICAL 14/15] Trapped: 3–5 people, location basement. Injured person present. Active bleeding. Vulnerable: elderly. Needs: medical, water, rescue tools."</i></p>
+  <p><b>Where the intelligence is:</b> a keyword triage rule on the node reads free text in English, Hindi or Telugu transliteration ("bleeding / khoon / raktham", "trapped / phas gaya", "paani / neellu") and sets the fields and urgency. Taps arrive as codes, so a Telugu tap shows up in English on the dashboard. The survivor's own words can still travel as an optional short text and are never thrown away.</p>
+  <div class="bad"><b>Do not claim these:</b> "tokenized embeddings", "a local AI reconstructs the report", "monitors structural telemetry", "thousands more devices". There is no neural network on an ESP32, our code uses a codebook, and we have no sensors. If a judge asks to see the AI model, those claims collapse. Say instead:</div>
+  <div class="say">"Other teams squeeze raw text through LoRa. We send <b>meaning</b>: a 5-byte semantic token decoded by a shared codebook. That cut airtime by <b>70%</b> in our measurements and fits <b>3.4× more SOS</b> on the same channel. It's deterministic, so it never makes up details, and the survivor's own words can still ride along."</div>
+</section>
+
+<!-- 06 SELF-HEALING -->
+<section class="page">
+  <div class="eyebrow">06 · Pillar 2</div>
+  <h2>Priority-aware, self-healing relays</h2>
+  <p class="lede">LoRa is just a radio. Self-healing comes from rules in the firmware. Each rule below is implemented in our simulator (<code>sim/selfheal.py</code>) and maps one-to-one to firmware work.</p>
+  <div class="grid2">
+    <div class="card"><h3>Healing rules</h3><ol><li><b>HELLO beacon</b> every 30 s ± 5 s: "I'm N hops from the gateway".</li><li><b>Neighbour table</b>: miss 3 beacons (90 s) and the neighbour is dropped.</li><li><b>Gradient</b>: my hops = best live neighbour + 1.</li><li><b>Closer-only forwarding</b> with a hop ACK; never bounce back.</li><li>No ACK in 2 s → retry, then the next-best neighbour.</li><li>No route at all → <b>store and carry</b> until one returns.</li></ol></div>
+    <div class="card"><h3>Priority rules</h3><ol><li>Every SOS has a class: P0 critical (urgency ≥ 10 or SOS button), P1 urgent, P2 info.</li><li>Queues are sorted by class, then age. "5 trapped, collapse" never waits behind "need water".</li><li>Copies per message: P0 16, P1 8, P2 4. Lifetime: P0 100 min, P1 67, P2 42.</li><li>A full buffer evicts lowest priority first; P0 is never evicted.</li><li>Delivery receipts purge leftover copies, which frees bandwidth for P0.</li></ol></div>
+  </div>
+  <figure><img src="fig/selfheal.svg"><figcaption>Simulated: survivor node S, gateway G, 8 relays, 260 m range, one SOS every 20 s. At 600 s the relay carrying traffic is destroyed and the route re-forms in <b>1.2 s</b> (S→R2→R4→R6→R8→G). At 1200 s the second exit relay dies and S is cut off, so messages are <b>stored, not lost</b>. At 1700 s R1 returns and the backlog is delivered. Self-healing: <b>119/119 delivered, 0 lost</b>. Fixed route: <b>29/119</b>.</figcaption></figure>
+  <div class="grid2"><figure><img src="fig/delivery.svg"><figcaption>66-node mobile simulation (60 moving, 6 fixed relays, 1 km², 120 m range, 100 min, 120 messages per run, 20% SOS, 5 seeds), with 0–50% of nodes destroyed at minute 20 plus a 17-minute blackout over 40% of the area.</figcaption></figure>
+  <figure><img src="fig/latency_overhead.svg"><figcaption>At 20% nodes destroyed: VOID-NAV delivers SOS in 2.4 min median vs 4.4 min for spray-and-wait, using ~40× fewer transmissions than epidemic flooding at near-identical delivery.</figcaption></figure></div>
+  <div class="say">"With one relay you can't show healing on a table, so we show it the honest way: the same rules in a simulator. Kill a relay: it re-routes in about a second. Cut the network: messages wait instead of dying. Bring a relay back: the backlog flushes. <b>119 of 119 delivered.</b>"</div>
+</section>
+
+<!-- 07 QUANTUM -->
+<section class="page">
+  <div class="eyebrow">07 · Pillar 3</div>
+  <h2>Quantum relay planning with QAOA</h2>
+  <p class="lede">The question: we have N possible relay spots (rooftops, poles, water tanks) and only K relays. Which K spots connect the most survivors? That's a combinatorial optimisation problem, and QAOA (Quantum Approximate Optimization Algorithm) is the leading near-term quantum method for it. It runs on the command laptop with Qiskit, never on the radios.</p>
+  <div class="grid2">
+    <figure><img src="fig/qaoa_map.svg" style="max-height:52mm"><figcaption>Demo map: 8 candidate sites (squares), 13 survivor clusters (dot size = people), 320 m radio range. QAOA's most frequent answer is sites 0, 4, 7, covering 50 of 64 people. That's the exact optimum, verified by brute force.</figcaption></figure>
+    <figure><img src="fig/qaoa_popt.svg" style="max-height:52mm"><figcaption>Textbook penalty QAOA samples the optimum no more often than random guessing. Our constraint-preserving XY-mixer QAOA reaches <b>21–23%</b>, about 6× a random valid plan. 100% of its samples place exactly K relays.</figcaption></figure>
+  </div>
+  <h3>The model</h3>
+  <pre>x_i = 1  → place a relay at site i            (one qubit per site)
+maximise people covered:   H(x) = − Σ C_i x_i  +  Σ_{i&lt;j} O_ij x_i x_j
+   C_i  = people within range of site i
+   O_ij = people within range of both i and j   (stops double counting)
+exactly K relays: enforced by the circuit itself (Dicke start state + XY mixer),
+                  or by a penalty P(Σx_i − K)² in the textbook version
+x_i = (1 − Z_i)/2  →  Ising Hamiltonian  →  QAOA circuit</pre>
+  <h3>The circuit (8 qubits, p = 3 layers, depth 44)</h3>
+  <ol><li><b>Start</b> in the Dicke state, an equal superposition of every plan with exactly K relays.</li>
+  <li><b>Cost layer</b> e<sup>−iγH</sup>: RZ gates (people each site covers) and RZZ gates (overlap between sites).</li>
+  <li><b>Mixer layer</b>: XY ring gates (RXX + RYY). They swap relays between sites but never change how many relays there are.</li>
+  <li>Repeat p times. A classical optimiser (COBYLA) tunes γ and β, warm-started layer by layer.</li>
+  <li><b>Measure</b> 8,192 shots on Qiskit's AerSimulator. The most frequent valid plan is the answer, checked against brute force.</li></ol>
+  <table><tr><th>Measured result (8 sites, K = 3)</th><th>Penalty QAOA, p=4</th><th>XY-mixer QAOA, p=3</th><th>Random valid plan</th></tr>
+    <tr><td>Probability of sampling the optimum</td><td>3.4%</td><td><b>21.1%</b></td><td>3.6%</td></tr>
+    <tr><td>Expected coverage (% of optimum)</td><td>67.7%</td><td><b>92.8%</b></td><td>80.1%</td></tr>
+    <tr><td>Samples that place exactly K relays</td><td>~80%</td><td><b>100%</b></td><td>100%</td></tr>
+    <tr><td>Most frequent answer</td><td>50/64 (optimal)</td><td><b>50/64 (optimal)</b></td><td>—</td></tr></table>
+  <div class="warn"><b>Say this before a judge does:</b> 8 sites with K = 3 has only 56 options, and brute force solves it in 0.1 ms. We claim <b>no speed-up today</b>. We show a correct quantum formulation that maps to real hardware, is verified against the exact answer, and improves on naive QAOA. The value grows with the problem: 100 sites with K = 10 already has 1.7 × 10<sup>13</sup> plans. The planner's input comes from population and building data before a disaster, and from SOS density afterwards.</div>
+</section>
+
+<!-- 08 QUANTUM GUIDE -->
+<section class="page">
+  <div class="eyebrow">08 · Do this tonight</div>
+  <h2>Quantum: step-by-step run and demo guide</h2>
+  <h3>1 · Install (you've already done most of this)</h3>
+  <pre>pip install qiskit qiskit-aer qiskit-optimization scipy numpy matplotlib
+python -c "import qiskit, qiskit_aer; print(qiskit.__version__, qiskit_aer.__version__)"</pre>
+  <p class="small">Tested here with Qiskit 2.5.2, Aer 0.17.2 and Python 3.11. The script builds the circuit gate by gate, so it works on Qiskit 1.x and 2.x.</p>
+  <h3>2 · Get the code</h3>
+  <pre>git clone https://github.com/lakshya0104/void-nav   (branch claude/relaxed-bell-alfwpa)
+cd void-nav/quantum</pre>
+  <h3>3 · Run the planner</h3>
+  <pre>python qaoa_relays.py --plot                 # XY-mixer QAOA, 8 sites, K=3, p=3
+python qaoa_relays.py --mixer penalty --reps 4  # textbook version, for comparison
+python qaoa_relays.py --k 2 --reps 2         # smaller and faster</pre>
+  <p>Expected output, about 1–2 minutes on a laptop:</p>
+  <pre>[xy mixer] 8 sites, place K=3  ->  56 valid placements, 8 qubits, p=3
+Brute force : sites [0, 4, 7] cover 50/64 people (0.10 ms)
+QAOA        : sites [0, 4, 7] cover 50 people  (approx ratio 1.00)
+Expected coverage: QAOA 92.8% of optimum  vs random placement 80.1%
+P(optimum)  : QAOA 21.1%  vs random bitstring 0.78%  vs random valid placement 3.6%
+P(valid K)  : 100.0%   circuit depth 44, 84 two-qubit gates</pre>
+  <p>It saves <code>qaoa_result.json</code>, which the dashboard reads to draw the planned relays, and <code>qaoa_result.png</code>, the map.</p>
+  <p class="small"><b>Your own map:</b> pass <code>--input venue.json</code> with <code>{"radius_m": 320, "sites": [[x,y],...], "clusters": [[x,y,people],...]}</code>.</p>
+  <h3>4 · Optional: real quantum hardware (before the event, needs internet)</h3>
+  <p>Make a free IBM Quantum account, run the same circuit once on a real device with <code>qiskit-ibm-runtime</code>, and screenshot the result as "the same circuit on IBM quantum hardware". Expect noisier results than the simulator, and say so.</p>
+  <h3>5 · How to show it to judges (45 seconds)</h3>
+  <table class="script"><tr><td>0:00</td><td>Set-up</td><td>Dashboard map shows candidate rooftops (squares) and SOS clusters (heat).</td></tr>
+    <tr><td>0:10</td><td>Click</td><td><b>"Plan relays (QAOA)"</b>. Show the circuit image: 8 qubits, one per rooftop.</td></tr>
+    <tr><td>0:20</td><td>Result</td><td>Planned relays appear with coverage circles: "50 of 64 people covered".</td></tr>
+    <tr><td>0:30</td><td>Proof</td><td>Side panel: <b>QAOA answer = brute-force optimum ✓</b>, P(optimum) 21% vs 3.6% random, 100% valid.</td></tr>
+    <tr><td>0:40</td><td>Honesty</td><td>"No speed-up claimed at 8 sites. It's the formulation that scales as quantum hardware grows, and it's verified today."</td></tr></table>
+  <div class="say">"Radios are classical and must be. Quantum belongs where the hard maths is: deciding where a rescue team's <b>few relays</b> reach the <b>most people</b>. Our constraint-preserving QAOA finds the exact optimum and samples it <b>6× more often than chance</b>, verified live against brute force."</div>
+</section>
+
+<!-- 09 DASHBOARD -->
+<section class="page">
+  <div class="eyebrow">09 · Command</div>
+  <h2>Dashboard and data: local server, no cloud</h2>
+  <div class="flow"><span>Gateway ESP32</span><i>USB serial · JSON lines →</i><span>Python server (pyserial + FastAPI)</span><i>→</i><span>SQLite file</span><i>WebSocket →</i><span>Browser dashboard</span><i>← Read / Dispatch / Reply</i></div>
+  <table><tr><th>Tab</th><th>What it shows</th><th>Data source</th></tr>
+    <tr><td><b>SOS inbox</b></td><td>Cards sorted critical-first, then newest. Decoded SemCode report, the survivor's own words, people, node, hops, RSSI/SNR, time. States Unread → Read (locked) → Dispatched. Alarm and flashing until opened.</td><td><span class="tag real">REAL</span> from LoRa</td></tr>
+    <tr><td><b>Map + heatmap</b></td><td>Offline map tiles, beacon node pin, heatmap of SOS density × people, relay health, QAOA planned relays</td><td>Node pin <span class="tag mock">CONFIGURED</span> (no GPS) · city heat <span class="tag sim">DEMO DATA</span> toggle</td></tr>
+    <tr><td><b>Network lab</b></td><td>Self-healing animation (kill or revive relays), semantic compression meter, QAOA planner</td><td><span class="tag sim">SIMULATED</span> · fed by the real latest packet</td></tr></table>
+  <h3>Where data is stored</h3>
+  <table><tr><th>Place</th><th>What</th><th>Survives</th></tr>
+    <tr><td>Beacon node RAM</td><td>Last 10 outgoing SOS with their state</td><td>Not a reboot. Saving to flash storage is a 30-minute upgrade.</td></tr>
+    <tr><td>Gateway RAM</td><td>Last 32 message IDs (for removing duplicates)</td><td>Not a reboot</td></tr>
+    <tr><td><b>Laptop SQLite</b> (<code>voidnav.db</code>)</td><td>Every SOS, every status change with timestamp and operator, signal stats</td><td>Restarts. Permanent until wiped after the operation.</td></tr>
+    <tr><td>Laptop log</td><td>Raw copy of every serial line</td><td>Audit trail and replay for the simulator</td></tr>
+    <tr><td>Cloud</td><td>Nothing. Optional sync to a district control room when backhaul exists.</td><td>—</td></tr></table>
+  <h3>Gateway → laptop message (one JSON per line)</h3>
+  <pre>{"ev":"sos","id":"3F2A-517","prio":0,"people":4,"cat":"TRAPPED","name":"","msg":"leg stuck, need water",
+ "token":"054c88f82a","rssi":-61,"snr":8.5,"hops":1}
+laptop → gateway:   READ 3F2A-517      DISPATCH 3F2A-517      REPLY 3F2A-517 Team arriving 10 min</pre>
+  <h3>Already built vs still to build</h3>
+  <table><tr><th>Part</th><th>Status</th></tr>
+    <tr><td>Firmware: portal, LoRa, retries, ACKs, Read/Dispatch → LEDs, button, single- and two-board roles</td><td><span class="tag real">BUILT</span> compiles for ESP32 core 3.3.12, zero warnings</td></tr>
+    <tr><td>66-node routing simulator + results</td><td><span class="tag real">BUILT</span></td></tr>
+    <tr><td>Self-healing relay simulator, SemCode encoder with airtime maths, QAOA planner</td><td><span class="tag real">BUILT</span> results in this document</td></tr>
+    <tr><td>Laptop server + dashboard + live network-lab animation</td><td><span class="tag mock">NEXT</span> ~3 hours</td></tr>
+    <tr><td>Firmware additions: SemCode on air, phone alarm tone, REPLY message, flash-saved queue</td><td><span class="tag mock">NEXT</span> ~2 hours</td></tr></table>
+</section>
+
+<!-- 10 STACK -->
+<section class="page">
+  <div class="eyebrow">10 · Tech stack</div>
+  <h2>Everything we use, and why</h2>
+  <table><tr><th>Layer</th><th>Technology</th><th>Why this choice</th></tr>
+    <tr><td>Microcontroller</td><td>ESP32-WROOM-32, dual-core 240 MHz, Wi-Fi + Bluetooth</td><td>About ₹450, makes its own hotspot, drives the radio over SPI</td></tr>
+    <tr><td>Long-range radio</td><td>Ai-Thinker RA-02 (Semtech SX1278), LoRa at 433 MHz, up to +18 dBm, sensitivity to about −139 dBm</td><td>Kilometre range at milliwatts, no towers, no licence fees at low power</td></tr>
+    <tr><td>Radio settings</td><td>SF9, 125 kHz bandwidth, CR 4/5, CRC on, private sync word 0x5A</td><td>About 1.8 kbit/s with good sensitivity; ignores other LoRa networks</td></tr>
+    <tr><td>Survivor access</td><td>ESP32 soft-AP + DNS captive portal + embedded HTML/JS page</td><td>Any phone, no app, no internet</td></tr>
+    <tr><td>Firmware</td><td>Arduino C++, ESP32 core 3.x, LoRa library by Sandeep Mistry, WebServer, DNSServer</td><td>Standard, well-tested tools</td></tr>
+    <tr><td>Reliability</td><td>Unique message IDs, ACK + retry (8 × ~4 s), duplicate removal, monotonic status, priority queue</td><td>The problem statement's "dependable delivery and status"</td></tr>
+    <tr><td>Semantic layer</td><td>SemCode 40-bit codebook + multilingual keyword triage</td><td>70% less airtime, deterministic, never makes up details</td></tr>
+    <tr><td>Command backend</td><td>Python 3, pyserial, FastAPI + WebSocket, SQLite</td><td>Runs offline on any laptop</td></tr>
+    <tr><td>Dashboard</td><td>HTML/JS, Leaflet with pre-cached offline tiles, Web Audio alarm</td><td>Opens on the laptop and on rescuer phones over local Wi-Fi</td></tr>
+    <tr><td>Quantum</td><td>Qiskit 2.x, Qiskit Aer, SciPy COBYLA; XY-mixer QAOA</td><td>Relay planning, verified against brute force</td></tr>
+    <tr><td>Simulation</td><td>Pure-Python delay-tolerant network simulator (66 nodes) + self-healing relay simulator</td><td>Evaluation under outages, as the problem statement asks</td></tr>
+    <tr><td>Security (roadmap)</td><td>AES-128/256 per deployment + truncated authentication tag (HMAC), keys loaded by the agency</td><td>Stops fake SOS and eavesdropping. AES-256 stays strong even against quantum attacks.</td></tr></table>
+  <h3>Key numbers to remember</h3>
+  <div class="grid3">
+    <div class="card"><div class="stat">1–5 km</div><div>typical LoRa range in cities and suburbs; 10+ km with line of sight. Published typical values, not yet measured by us.</div></div>
+    <div class="card"><div class="stat">165 ms</div><div>airtime of one SemCode SOS at SF9 (554 ms as free text)</div></div>
+    <div class="card"><div class="stat">≈₹1,200</div><div>per node (ESP32 + RA-02 + antenna), excluding battery</div></div>
+    <div class="card"><div class="stat">2–3 days</div><div>estimated beacon node life on 10,000 mAh with the hotspot on. Estimate only. Relays without Wi-Fi last much longer.</div></div>
+    <div class="card"><div class="stat">~30 m</div><div>phone Wi-Fi reach in the open, less through rubble. That's why the network is carried in.</div></div>
+    <div class="card"><div class="stat">0</div><div>internet, SIM, app or cloud needed, anywhere in the chain</div></div>
+  </div>
+</section>
+
+<!-- 11 DEMO SCRIPT -->
+<section class="page">
+  <div class="eyebrow">11 · The demo</div>
+  <h2>The 4-minute script: make the judge the survivor</h2>
+  <p class="lede">Roles: <b>Presenter</b> (you) narrates and hands the judge a phone. <b>Jyothir</b> is the rescue commander at the laptop. The beacon node sits at the far end of the table or across the room. The gateway is plugged into the laptop. The webcam points at the beacon node's LEDs and shows them on the big screen.</p>
+  <table class="script">
+    <tr><td>0:00</td><td>Hook</td><td>"Earthquake. Towers down. You're on the second floor and your phone says <i>No service</i>." Turn off the laptop's Wi-Fi in front of them: "No internet in this demo either."</td></tr>
+    <tr><td>0:20</td><td>Survivor</td><td>Hand the judge a phone already joined to <b>VOID-NAV SOS</b>, with a QR code as backup. The SOS page is open.</td></tr>
+    <tr><td>0:40</td><td>Send</td><td>Judge taps <b>Trapped</b>, sets people to 3, types "leg stuck, need water", presses SEND. The phone shows <b>Sending (try 1)</b> and the orange LED blinks fast on the webcam.</td></tr>
+    <tr><td>1:00</td><td>Lands</td><td>Alarm sounds on the dashboard. A red card appears: decoded report, the judge's own words, <b>RSSI −58 dBm</b> ("that's a real radio signal"). The phone shows <b>Delivered</b> and the LED slows its blink.</td></tr>
+    <tr><td>1:20</td><td>Read</td><td>Jyothir opens the card → <b>READ</b>. Orange LED turns solid and the judge's phone beeps with "Read by rescuer". "You now know a human saw it."</td></tr>
+    <tr><td>1:40</td><td>Dispatch</td><td>Jyothir clicks <b>Dispatch → Team 2</b> and sends "Team arriving in 10 min". Green LED, the phone alarm and the message pop up.</td></tr>
+    <tr><td>2:00</td><td>No phone</td><td>Press the beacon node's <b>push button</b>. An instant critical SOS appears. "For someone with no phone, or a rescuer who just found someone."</td></tr>
+    <tr><td>2:15</td><td>Failure</td><td>Unplug the gateway's USB. The judge sends again and the phone stays at <b>Sending, retrying</b>. Plug it back in: <b>Delivered</b>. "Status is real, not cosmetic."</td></tr>
+    <tr><td>2:40</td><td>Bandwidth</td><td>Network lab: the judge's message as text is 102 bytes / 554 ms; as a SemCode token it's 15 bytes / 165 ms. "70% less airtime, 3.4× more SOS per channel."</td></tr>
+    <tr><td>3:00</td><td>Healing</td><td>Simulator: the judge's SOS hops S→R1→R3→R5→R8→G. Kill R1, and it re-routes in about a second. Cut off S: messages wait. Revive: the backlog flushes. "119 of 119."</td></tr>
+    <tr><td>3:25</td><td>Quantum</td><td>Click <b>Plan relays (QAOA)</b>. Planned relays appear with "QAOA = brute-force optimum ✓, 6× better than chance".</td></tr>
+    <tr><td>3:45</td><td>Close</td><td>"An instant private network rescuers carry in. Any phone becomes a beacon, and it gets an answer back. Built on ₹1,200 nodes." Point to the honesty panel: real vs simulated.</td></tr></table>
+  <div class="grid2">
+    <div class="good"><b>Why judges remember this:</b> they did it themselves; there's a sound when the SOS lands and a beep on their own phone; they see the LEDs change on a big screen; they see a failure handled honestly; and there's one number per pillar.</div>
+    <div class="warn"><b>Keep it under 4 minutes.</b> Rehearse 3 times. Whoever is speaking, the other person drives the screen. If anything fails, switch to the backup video without apologising: "Here's the same flow recorded an hour ago."</div>
+  </div>
+</section>
+
+<!-- 12 SETUP -->
+<section class="page">
+  <div class="eyebrow">12 · Logistics</div>
+  <h2>Setup checklist, roles and backup plans</h2>
+  <div class="grid2">
+    <div class="card"><h3>Before judges arrive</h3><ol>
+      <li>Both antennas on. Beacon node on the power bank (check the bank doesn't auto-switch-off). Gateway USB in the laptop.</li>
+      <li>Serial monitor closed. Dashboard server running. Alarm volume up.</li>
+      <li>Demo phone joined to VOID-NAV SOS with the page open. A second phone as spare. QR card for <code>192.168.4.1</code>.</li>
+      <li>Webcam on the LEDs, visible on screen.</li>
+      <li>Simulator and QAOA results pre-loaded (QAOA takes 1–2 min, so run it once before and show the cached result if pressed for time).</li>
+      <li>Clear old messages from the dashboard so the judge's SOS is the first card.</li>
+      <li>Backup video open in another tab.</li></ol></div>
+    <div class="card"><h3>Failure → fallback</h3><table>
+      <tr><td>Portal doesn't pop up</td><td>Open <code>192.168.4.1</code> or scan the QR. Turn off mobile data.</td></tr>
+      <tr><td>LoRa link dead</td><td>Check antennas and 3V3. Press EN on both boards. Move the boards closer.</td></tr>
+      <tr><td>Phone page slow</td><td>A crowded 2.4 GHz hall. Keep the phone within 2 m of the node.</td></tr>
+      <tr><td>Laptop dashboard crash</td><td>Restart the server; messages are safe in SQLite. The node keeps retrying meanwhile.</td></tr>
+      <tr><td>QAOA too slow</td><td>Show the cached result. Run <code>--k 2 --reps 2</code> live.</td></tr>
+      <tr><td>Everything fails</td><td>Backup video + simulators + this document's numbers.</td></tr></table></div>
+  </div>
+  <h3>Who says what</h3>
+  <table><tr><th>Part</th><th>Presenter</th><th>Jyothir</th></tr>
+    <tr><td>Hook, problem, scope</td><td>Speaks</td><td>Shows the architecture slide</td></tr>
+    <tr><td>Live loop</td><td>Guides the judge on the phone</td><td>Commander: Read, Dispatch, Reply</td></tr>
+    <tr><td>Semantic and healing</td><td>Explains the numbers</td><td>Drives the network lab</td></tr>
+    <tr><td>Quantum</td><td>Explains the problem and limits</td><td>Clicks Plan, shows the proof panel</td></tr>
+    <tr><td>Q&amp;A</td><td>Product, impact, business</td><td>Hardware, firmware, quantum maths</td></tr></table>
+  <h3>Tonight: rehearsal checklist</h3>
+  <ul><li>Run the full loop 10 times in a row and count how many succeed. That's a real reliability number to quote, e.g. "10 of 10 in our tests".</li>
+  <li>Measure SOS latency from tap to dashboard with a stopwatch, five times. Quote the median.</li>
+  <li>If time allows, do a range walk test with the beacon node outside, and quote the distance at which messages still arrive.</li>
+  <li>Record the backup video: phone, LEDs and dashboard in one shot.</li></ul>
+</section>
+
+<!-- 13 Q&A -->
+<section class="page">
+  <div class="eyebrow">13 · Judge Q&amp;A</div>
+  <h2>Every hard question we expect, with honest answers</h2>
+  <table class="qa">
+    <tr><th>Question</th><th>Answer</th></tr>
+    <tr><td>What if the survivor has no phone?</td><td>The push button on the beacon node sends a one-press SOS. A rescue watch or wearable could be another input to the same network later. People with no device at all are found by search dogs, radar and thermal cameras, and those findings travel over our network.</td></tr>
+    <tr><td>What if the phone battery is dead?</td><td>Then nothing transmits, and no system can hear it. That's physics. We minimise drain: the page is tiny, there's no app, and status updates arrive without the person re-sending. Awareness drills say "keep Wi-Fi on, save battery".</td></tr>
+    <tr><td>What if the node's battery dies?</td><td>Messages already delivered are safe on the laptop. The node's queue is lost today; saving it to flash is planned. Estimated 2–3 days on 10,000 mAh with the hotspot on. Solar plus a charge board is the roadmap. Relays without Wi-Fi sleep and last much longer.</td></tr>
+    <tr><td>How does a survivor know to join the Wi-Fi?</td><td>Pre-disaster awareness ("turn Wi-Fi on, join VOID-NAV SOS"), one line in the official alert SMS, rescuers shouting on site, and an open network at the top of the Wi-Fi list.</td></tr>
+    <tr><td>Can you auto-connect to phones?</td><td>No, and we shouldn't. Phones never join networks by themselves, which is a security feature. We invite rather than intrude.</td></tr>
+    <tr><td>How far does it reach?</td><td>Phone to node: tens of metres (Wi-Fi), so nodes are carried in or pre-placed. Node to node: typically 1–5 km in cities, more with height. Each relay extends that.</td></tr>
+    <tr><td>Where is the relay? You have two radios.</td><td>A relay needs a third radio. Our two boards prove the real over-the-air link in both directions. The multi-hop rules run in a simulator using the same message rules, labelled as simulated.</td></tr>
+    <tr><td>How do you know the message was delivered?</td><td>The gateway acknowledges every SOS, and the node retries until it gets that acknowledgement. Read and Dispatch are acknowledged back. After 8 failed tries the phone says "Not delivered". Unplug the gateway and watch.</td></tr>
+    <tr><td>Where is the AI?</td><td>The semantic encoder and keyword triage, which run deterministically. We deliberately keep neural models off the critical path because they can make up details. An offline language model on the laptop could summarise long notes in future.</td></tr>
+    <tr><td>Why quantum? Brute force is faster.</td><td>At 8 sites, yes, and we say so. QAOA is the method that maps to quantum hardware as maps grow (100 sites with K = 10 is 1.7 × 10<sup>13</sup> plans). Our XY-mixer version is verified against the exact answer and beats naive QAOA.</td></tr>
+    <tr><td>How do you know the survivor's location?</td><td>Today it's the beacon node's configured position, because a browser won't give GPS location to a plain local web page. Next: a GPS module on every node, plus a "floor / room" answer in the form.</td></tr>
+    <tr><td>Is it secure? Can someone spoof an SOS?</td><td>The prototype is not encrypted yet. Roadmap: per-deployment AES key plus an authentication tag on every packet, so only authorised nodes can relay. We collect no phone numbers, and a name is optional.</td></tr>
+    <tr><td>Privacy?</td><td>No identities collected. Local IPs are temporary and identify no one. Data stays on the command laptop and is wiped after the operation.</td></tr>
+    <tr><td>Is 433 MHz legal in India?</td><td>The demo runs at low power. India's licence-free 433 MHz allowance is very restrictive, so production moves to 865–867 MHz modules with duty-cycle limits under WPC rules (the Indian radio regulator). The firmware change is one line.</td></tr>
+    <tr><td>How many users at once?</td><td>The channel carries about 4,000 SemCode SOS per hour vs about 1,200 text messages (peak ALOHA use). Phones share one node's Wi-Fi, about 10 at once on an ESP32 by default. Multiple nodes and channels scale it further.</td></tr>
+    <tr><td>Why not Meshtastic or a rescue watch?</td><td>Both need a device per person, set up beforehand. We use the phone already in every pocket, plus a rescue workflow with Read/Dispatch status. Watches can join our network as inputs.</td></tr>
+    <tr><td>What if the command laptop dies?</td><td>Saved data is in SQLite. Nodes keep retrying, and any second gateway or laptop can take over. Multiple gateways is on the roadmap.</td></tr>
+    <tr><td>What if a relay is destroyed?</td><td>Neighbours notice 3 missed beacons and route around it, about 1 s in our simulation once detected. If there's no route, messages are stored, not dropped.</td></tr>
+    <tr><td>Flooding, water, metal?</td><td>Water and metal block radio. Nodes go on rooftops or boats in waterproof boxes, and moving boats work as message carriers.</td></tr>
+    <tr><td>Cost?</td><td>About ₹1,200 per node excluding battery. One ₹1.34 lakh satellite handset costs about the same as 100 nodes.</td></tr>
+  </table>
+</section>
+
+<!-- 14 STAND OUT -->
+<section class="page">
+  <div class="eyebrow">14 · Competition</div>
+  <h2>Standing out among 290 teams and 12 tracks</h2>
+  <p class="lede">We can't see every team's build, so this reads the field from what you observed and from what usually happens at hackathons this size. Judges remember a story they lived, one clear number, and honesty under pressure.</p>
+  <table><tr><th>Track</th><th>What usually appears</th><th>How we read against it</th></tr>
+    <tr><td>Next Gen Communication (ours)</td><td>LoRa mesh text, slides about 6G, a watch idea; few working two-way demos</td><td>Working two-way loop with real RSSI, plus 3 measured pillars. The watch team needs hardware they may not have.</td></tr>
+    <tr><td>Open Innovation</td><td>Drones, robots, flashy builds</td><td>We don't compete on spectacle. We compete on "the judge used it and it worked".</td></tr>
+    <tr><td>Embedded / Circuit Design</td><td>Strong hardware with weaker system story</td><td>We have hardware plus system, network and dashboard</td></tr>
+    <tr><td>Generative AI</td><td>Chatbots and assistants</td><td>Our semantic layer is deterministic and measured, which reads as more mature</td></tr>
+    <tr><td>Defence / Security</td><td>Surveillance, encryption, drones</td><td>"Instant private network" also has a defence variant; mention it in one line</td></tr>
+    <tr><td>Health, Green, Sustainable, Smart Automation</td><td>Monitoring and IoT dashboards</td><td>Our impact story (lives, minutes, cost) is direct</td></tr>
+    <tr><td>Blockchain, E-commerce, Game Dev</td><td>Software-only</td><td>Live hardware is rarer and more memorable</td></tr></table>
+  <h3>Ten things that make judges remember VOID-NAV</h3>
+  <ol><li><b>Make the judge the survivor</b>: their phone, their SOS, their beep.</li>
+  <li><b>A sound when the SOS lands</b>. Rooms remember sound.</li>
+  <li><b>LEDs on the big screen through the webcam</b>, changing orange to green.</li>
+  <li><b>Kill the internet in front of them</b> by turning off laptop Wi-Fi.</li>
+  <li><b>Show a failure handled honestly</b>: unplug, "retrying", plug in, "delivered".</li>
+  <li><b>One number per pillar</b>: −70% airtime · 119/119 delivered · 6× quantum.</li>
+  <li><b>The honesty panel</b>: real, simulated and mock, labelled on screen.</li>
+  <li><b>Name the competitors yourself</b>: Meshtastic, Project OWL, satellite SOS.</li>
+  <li><b>Physical polish</b>: label the boxes "BEACON" and "COMMAND"; a one-page leaflet with a QR code.</li>
+  <li><b>One sentence everyone repeats</b>: "An instant private network rescuers carry in. Any phone becomes a beacon, and it gets an answer back."</li></ol>
+  <div class="bad"><b>What loses points:</b> claiming AI or quantum magic you can't show; saying "100% reliable"; overpromising range; a demo that depends on venue Wi-Fi; reading slides; going over time.</div>
+</section>
+
+<!-- 15 BUSINESS -->
+<section class="page">
+  <div class="eyebrow">15 · Business and future</div>
+  <h2>From hackathon kit to standard rescue equipment</h2>
+  <h3>Customers and revenue</h3>
+  <table><tr><th>Stream</th><th>Customer</th><th>Model</th></tr>
+    <tr><td>Rescue kits (beacon nodes + relays + gateway)</td><td>NDRF, SDRF, fire services, district disaster authorities</td><td>One-time hardware sale through government procurement</td></tr>
+    <tr><td>Command software licence</td><td>State disaster authorities</td><td>Annual licence: dashboard, planner, updates, training</td></tr>
+    <tr><td>Pre-placed SOS points</td><td>Cyclone shelters, schools, hospitals, panchayats, railways</td><td>Government and CSR-funded installations with maintenance contracts</td></tr>
+    <tr><td>Event mode</td><td>Kumbh, stadiums, pilgrimages (lost person and medical help when networks jam)</td><td>Rental per event</td></tr>
+    <tr><td>Defence variant</td><td>Army and paramilitary units with no infrastructure</td><td>Through iDEX and defence innovation programmes</td></tr></table>
+  <p class="small">Prices to be validated with real component quotes and pilot feedback. We don't quote numbers we haven't measured.</p>
+  <h3>Why it's viable</h3>
+  <ul><li><b>Cheap:</b> about ₹1,200 per node. A 20-node neighbourhood kit costs less than one satellite handset.</li><li><b>No recurring telecom costs:</b> licence-free band, no SIMs, no cloud.</li><li><b>Uses what people already have:</b> no device distribution to citizens.</li><li><b>Fits India's system:</b> exports CAP records to SACHET-style platforms when backhaul exists.</li></ul>
+  <h3>Roadmap</h3>
+  <table><tr><th>When</th><th>What</th></tr>
+    <tr><td>Hackathon</td><td>Two-board live loop; semantic, self-healing and QAOA proofs; dashboard</td></tr>
+    <tr><td>+1 month</td><td>Third radio for a physical relay; GPS module; SemCode on air; encryption and authentication; flash-saved queue; buzzer</td></tr>
+    <tr><td>+3 months</td><td>865 MHz modules; waterproof enclosures; solar relays; range and reliability field test on campus</td></tr>
+    <tr><td>+6 months</td><td>Pilot drill with a district disaster authority or SDRF; multi-gateway database sync; CAP export</td></tr>
+    <tr><td>+12 months</td><td>Drone or tethered-aerostat relays for large areas; satellite backhaul at command; QAOA on IBM quantum hardware for city-scale plans; passive phone presence counter (privacy-preserving)</td></tr></table>
+  <h3>Other uses for the same kit</h3>
+  <div class="grid3"><div class="card"><b>Crowds</b><br>Lost-person and medical reports at mass gatherings where cell networks jam</div><div class="card"><b>Remote areas</b><br>Villages, forests, fishermen and mines without coverage</div><div class="card"><b>Defence</b><br>Instant closed network for a unit with no infrastructure</div></div>
+</section>
+
+<!-- 16 HONESTY + BUILD ORDER + SOURCES -->
+<section class="page">
+  <div class="eyebrow">16 · Honesty, build order, sources</div>
+  <h2>Real vs simulated: put this on screen</h2>
+  <table><tr><th>Shown in demo</th><th>Status</th></tr>
+    <tr><td>Phone → Wi-Fi SOS page, no app, no internet</td><td><span class="tag real">REAL</span></td></tr>
+    <tr><td>LoRa transmission between two independent boards, RSSI/SNR</td><td><span class="tag real">REAL</span></td></tr>
+    <tr><td>Retries, delivery ACK, Read/Dispatch back to LEDs and phone, alarm tone</td><td><span class="tag real">REAL</span></td></tr>
+    <tr><td>Push-button SOS</td><td><span class="tag real">REAL</span></td></tr>
+    <tr><td>SemCode encoding and airtime numbers</td><td><span class="tag real">REAL</span> code and formula · on-air once added to firmware</td></tr>
+    <tr><td>Multi-hop relays, self-healing, 66-node outage evaluation</td><td><span class="tag sim">SIMULATED</span></td></tr>
+    <tr><td>QAOA relay plan</td><td><span class="tag real">REAL</span> quantum circuit on a simulator · demo map</td></tr>
+    <tr><td>City heatmap, other SOS pins, node GPS position</td><td><span class="tag mock">MOCK / CONFIGURED</span></td></tr>
+    <tr><td>Encryption, hospital links, phone scanning</td><td><span class="tag no">ROADMAP</span></td></tr></table>
+  <h3>Build order for tonight (stop when time runs out; each step is demo-able)</h3>
+  <ol><li>Flash <b>ROLE_NODE</b> on ESP32 #1 and <b>ROLE_GATEWAY</b> on ESP32 #2 → both print "radio OK" → phone SOS reaches the gateway.</li>
+  <li>Dashboard inbox with alarm and Read/Dispatch over serial → LEDs change. <b>Record the backup video.</b></li>
+  <li>Phone alarm tone and REPLY message (firmware).</li>
+  <li>Network lab: self-healing animation and semantic meter.</li>
+  <li>QAOA button reading <code>qaoa_result.json</code>.</li>
+  <li>Map with labelled demo data; SemCode on air.</li></ol>
+  <h3>Files in the repo (branch <code>claude/relaxed-bell-alfwpa</code>)</h3>
+  <table><tr><th>Path</th><th>What</th></tr>
+    <tr><td><code>firmware/voidnav_esp32/</code></td><td>ESP32 firmware (single-board, node and gateway roles)</td></tr>
+    <tr><td><code>docs/wiring.html</code></td><td>Beginner wiring guide</td></tr>
+    <tr><td><code>quantum/qaoa_relays.py</code></td><td>QAOA relay planner (penalty and XY mixer) with brute-force check</td></tr>
+    <tr><td><code>semantic/semcode.py</code></td><td>SemCode encoder/decoder, keyword triage, LoRa airtime maths</td></tr>
+    <tr><td><code>sim/voidnav.py</code> · <code>sim/selfheal.py</code></td><td>Outage evaluation and self-healing relay simulators</td></tr>
+    <tr><td><code>deck/</code> · <code>report/</code></td><td>Presentation deck and this playbook</td></tr></table>
+  <h3>Sources</h3>
+  <ul class="foot">
+    <li>Project OWL / ClusterDuck: IBM Developer, developer.ibm.com/callforcode/?p=6618 · Route Fifty, route-fifty.com (2019) · FCW Sept/Oct 2019 (field test results) · github.com/ClusterDuck-Protocol</li>
+    <li>India cell broadcast and SACHET: newsonair.gov.in (July 2025 testing) · GSMA "India's SACHET Public Warning System" (May 2025) · opengovasia.com (2026 launch report)</li>
+    <li>Satellite SOS in India: in.benzinga.com and sammobile.com (Globalstar licence pending) · telecomreviewasia.com (BSNL satellite handset, ≈₹1,34,166)</li>
+    <li>Meshtastic in disasters: btip.ka.edu.pl (2025 crisis-communication study) · wiki.heltec.org (Louisiana mesh community) · hackster.io (rugged disaster node)</li>
+    <li>LoRa airtime: Semtech AN1200.13 time-on-air formula, implemented in semantic/semcode.py · RA-02 / SX1278 datasheet values</li>
+    <li>All simulation and QAOA numbers: produced by the code listed above (seeded, reproducible)</li></ul>
+</section>
+</body></html>

@@ -1,0 +1,59 @@
+{
+ "token_hex": "054c88f82a",
+ "decoded": {
+  "cat": "TRAPPED",
+  "injured": "YES",
+  "bleeding": "YES",
+  "people": "3-5",
+  "pos": "BASEMENT",
+  "vuln": [
+   "ELDERLY"
+  ],
+  "needs": [
+   "MEDICAL",
+   "WATER",
+   "RESCUE_TOOLS"
+  ],
+  "urgency": 14,
+  "minutes_since_event": 42
+ },
+ "report": "[CRITICAL 14/15] Trapped: 3-5 people, location basement. Injured person present. Active bleeding. Vulnerable: elderly. Needs: medical, water, rescue tools. Reported 42 min after event.",
+ "rows": [
+  {
+   "format": "Free-text SMS-style message",
+   "bytes": 102,
+   "airtime_sf9_ms": 554.0,
+   "airtime_sf12_ms": 4104.2,
+   "channel_msgs_per_hour_sf9": 1195,
+   "duty1pct_msgs_per_hour_per_node_sf12": 8,
+   "airtime_saving_vs_text": 0.0
+  },
+  {
+   "format": "JSON form (typical app)",
+   "bytes": 224,
+   "airtime_sf9_ms": 1106.9,
+   "airtime_sf12_ms": 8036.4,
+   "channel_msgs_per_hour_sf9": 598,
+   "duty1pct_msgs_per_hour_per_node_sf12": 4,
+   "airtime_saving_vs_text": -0.998
+  },
+  {
+   "format": "VOID-NAV v1 text packet (current firmware)",
+   "bytes": 96,
+   "airtime_sf9_ms": 533.5,
+   "airtime_sf12_ms": 3940.4,
+   "channel_msgs_per_hour_sf9": 1241,
+   "duty1pct_msgs_per_hour_per_node_sf12": 9,
+   "airtime_saving_vs_text": 0.037
+  },
+  {
+   "format": "SemCode token + header",
+   "bytes": 15,
+   "airtime_sf9_ms": 164.9,
+   "airtime_sf12_ms": 1155.1,
+   "channel_msgs_per_hour_sf9": 4017,
+   "duty1pct_msgs_per_hour_per_node_sf12": 31,
+   "airtime_saving_vs_text": 0.702
+  }
+ ]
+}

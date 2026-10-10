@@ -1,0 +1,95 @@
+{
+ "mixer": "penalty",
+ "n_sites": 8,
+ "k": 3,
+ "reps": 2,
+ "qubits": 8,
+ "total_people": 64,
+ "brute_force": {
+  "sites": [
+   0,
+   4,
+   7
+  ],
+  "people": 50,
+  "seconds": 0.00011292800002138392,
+  "placements": 56
+ },
+ "qaoa": {
+  "most_frequent": [
+   3,
+   5,
+   6
+  ],
+  "people_most_frequent": 39,
+  "best_sampled": [
+   0,
+   4,
+   7
+  ],
+  "people_best_sampled": 50,
+  "approx_ratio": 0.78,
+  "expected_ratio": 0.7408696198467782,
+  "random_expected_ratio": 0.8014285714285714,
+  "p_optimum": 0.034659136746869275,
+  "p_valid": 0.9210777611986743,
+  "p_optimum_random_guess": 0.0078125,
+  "p_optimum_random_valid": 0.03571428571428571,
+  "gammas": [
+   0.28661421014956534,
+   1.4540360764736175
+  ],
+  "betas": [
+   2.859339571084334,
+   3.0456177852380275
+  ],
+  "optimise_seconds": 12.534051156000032,
+  "circuit_depth": 26,
+  "two_qubit_gates": 56,
+  "shots": 8192
+ },
+ "coverage": [
+  [
+   0,
+   1,
+   5
+  ],
+  [
+   1,
+   2,
+   3
+  ],
+  [
+   2,
+   3,
+   4
+  ],
+  [
+   1,
+   5,
+   6,
+   9
+  ],
+  [
+   2,
+   6,
+   7
+  ],
+  [
+   4,
+   7,
+   8,
+   12
+  ],
+  [
+   9,
+   10
+  ],
+  [
+   8,
+   10,
+   11,
+   12
+  ]
+ ]
+}
