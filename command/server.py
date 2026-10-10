@@ -15,7 +15,7 @@ retried every RETRY_S seconds until the gateway ACKs it; after MAX_TRIES it is m
 "Unplug gateway" on the dashboard cuts the emulated link so failures are visible.
 RSSI/SNR in emulated mode are generated and labelled EMULATED, never presented as measured.
 """
-import argparse, json, os, random, socket, sqlite3, sys, threading, time
+import argparse, json, math, os, random, socket, sqlite3, sys, threading, time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
@@ -200,6 +200,24 @@ def cap_xml(m):
   </info>
 </alert>
 """
+
+
+def run_qiskit(j):
+    """Run the relay planner in Qiskit (quantum/qiskit_planner.py) on the operator's map inputs."""
+    qk = S["qk"]
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "quantum"))
+        import qiskit_planner as QP
+        lat0, lon0 = 17.4158, 78.5071; kx = 111320 * math.cos(math.radians(lat0)); ky = 110540
+        m = lambda ll: [(ll[1] - lon0) * kx, (ll[0] - lat0) * ky]
+        d = {"radius_m": float(j["radius_m"]), "target": float(j.get("target", .9)), "layers": int(j.get("layers", 2)),
+             "sites": [m(s) for s in j["sites"]], "clusters": [m(g["ll"]) + [int(g["n"])] for g in j["groups"]]}
+        qk["result"] = QP.plan(d, log=lambda s: qk["log"].append(s))
+    except ImportError as e:
+        qk["error"] = f"Qiskit is not installed on this laptop ({e}). Run: pip install qiskit qiskit-aer scipy numpy"
+    except Exception as e:
+        qk["error"] = f"{type(e).__name__}: {e}"
+    qk["running"] = False
 
 
 def public(m):
@@ -445,6 +463,8 @@ class H(SimpleHTTPRequestHandler):
             with LOCK:
                 return self._json({"seq": S["seq"], "link": S["link"], "mode": S["mode"], "linktype": S.get("linktype"),
                                    "events": [e for e in S["events"] if e["seq"] > since]})
+        elif u.path == "/api/qiskit":
+            return self._json(S.get("qk", {"running": False, "log": [], "result": None, "error": None}))
         elif u.path == "/api/compress":
             with LOCK:
                 m = S["msgs"].get(q.get("id", [""])[0])
@@ -485,6 +505,11 @@ class H(SimpleHTTPRequestHandler):
             ids = [j.get("id")] if j.get("id") else [i for i in S["order"] if S["msgs"][i]["state"] in ("DELIVERED", "READ", "DISPATCHED")]
             ok = all(downlink(i, kind, str(j.get("text", ""))[:120]) for i in ids)
             return self._json({"ok": ok})
+        if u.path == "/api/qiskit":
+            if S.get("qk", {}).get("running"): return self._json({"ok": False, "msg": "already running"})
+            S["qk"] = {"running": True, "log": [], "result": None, "error": None}
+            threading.Thread(target=run_qiskit, args=(j,), daemon=True).start()
+            return self._json({"ok": True})
         if u.path == "/api/rescuer_pos":
             try: S["rescuer_pos"] = [float(j["lat"]), float(j["lon"])]
             except (KeyError, TypeError, ValueError): return self._json({"ok": False}, 400)
@@ -518,12 +543,12 @@ if __name__ == "__main__":
         input("Press Enter to exit"); sys.exit(1)
     print("=" * 66)
     if live:
-        print("  VOID-NAV command v6 · 10-Oct · LIVE: SOS Node1 (ESP32) on USB")
+        print("  VOID-NAV command v7 · 10-Oct · LIVE: SOS Node1 (ESP32) on USB")
         print(f"  Dashboard on this laptop : http://localhost:{a.port}/command")
         print("  Survivor phone           : join Wi-Fi \"SOS Node1\", open http://192.168.4.1")
         print("  (the laptop does NOT need to join SOS Node1; the ESP32 talks over the USB cable)")
     else:
-        print("  VOID-NAV command v6 · 10-Oct · EMULATED link (no ESP32)")
+        print("  VOID-NAV command v7 · 10-Oct · EMULATED link (no ESP32)")
         print(f"  Dashboard : http://localhost:{a.port}/command")
         print("  Survivor SOS page (phone on the same hotspot/Wi-Fi):")
         for x in all_ips():

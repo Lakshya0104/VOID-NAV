@@ -114,6 +114,32 @@ The browser statevector reproduces the Qiskit Aer reference run of `quantum/qaoa
 
 Click a relay to destroy it and watch the route re-form. Click it again to restore it.
 
+### Running the planner in Qiskit
+
+`command/quantum/qiskit_planner.py` builds the same circuit in **Qiskit 2.x**:
+- `initialize` (Dicke |K⟩) → `rz`/`rzz` cost layer → `rxx`+`ryy` ring mixer, repeated p times;
+- the angles are optimised with **COBYLA** on `Statevector`, warm-started layer by layer;
+- the circuit is transpiled and sampled **8,192 shots on `AerSimulator`**;
+- every K is compared with brute force.
+
+```bash
+pip install qiskit qiskit-aer scipy numpy          # or command\install_qiskit.bat
+python command/quantum/qiskit_planner.py --draw    # playbook demo map: prints per-K results + the circuit
+```
+
+In the dashboard, **Run in Qiskit Aer** sends the operator's own map inputs to this script and shows its log and answer.
+
+Measured on the playbook map (8 sites, 13 groups, 64 people, 320 m, p = 2):
+
+| K | Best sampled plan | People | Brute force | P(optimum) QAOA | Random valid plan |
+|---|---|---|---|---|---|
+| 1 | [4] | 19 | 19 ✓ | 48.5% | 12.5% |
+| 2 | [3, 5] | 35 | 35 ✓ | 36.2% | 10.7% |
+| 3 | [2, 3, 7] | 50 | 50 ✓ | 15.7% | 3.6% |
+| 4 | [0, 2, 4, 7] | 59 | 59 ✓ | 12.4% | 1.4% |
+
+**4 relays are needed for ≥90% coverage** (59/64 people). 100% of shots placed exactly K relays.
+
 ## Run the dashboard
 
 **Requirements:** Python 3.8+ (Windows, macOS or Linux). `pyserial` is needed only when an ESP32 is connected; `start.bat` installs it.

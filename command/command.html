@@ -176,10 +176,13 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{text-align:left;p
 .hss{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.hss div{background:var(--p2);border-radius:10px;padding:8px 10px;font-size:11px;color:var(--mut)}.hss b{display:block;font:700 15px var(--m);color:var(--fg);overflow-wrap:anywhere}
 .hsl{font:11px/1.6 var(--m);color:var(--mut);max-height:140px;overflow:auto;margin-top:8px}.hsl span{color:var(--dim)}
 @media (max-width:1000px){.rp{grid-template-columns:1fr}}
+.qk{border-color:var(--vio)!important;color:#d6c8ff;font-weight:800}
+.qklog{font:11px/1.6 var(--m);color:var(--mut);background:#0b111c;border-radius:10px;padding:10px;margin-top:10px;white-space:pre-wrap;max-height:220px;overflow:auto}
+.qkh{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.qkh b{color:var(--vio)}
 </style></head><body>
 <div id="sound"><div><h2>VOID-NAV Command</h2><p>Click to start the console. This enables the alarm sound and voice alerts for critical SOS.</p><button class="pri" id="go">Start console</button></div></div>
 <header>
-  <div class="brand"><b>VOID-NAV</b><span>RESCUE COMMAND · MUSHEERABAD · v6 · 10-Oct</span></div>
+  <div class="brand"><b>VOID-NAV</b><span>RESCUE COMMAND · MUSHEERABAD · v7 · 10-Oct</span></div>
   <nav id="nav"><button data-t="inbox" class="on">SOS Inbox<span class="n" id="nUnread" hidden>0</span></button><button data-t="map">Map</button><button data-t="relays">Relays · QAOA</button></nav>
   <div class="sp"></div>
   <div class="link" id="link"><i></i><span id="linkTxt">LoRa link</span> <span class="tag t-emu" id="modeTag">EMULATED</span></div>
@@ -222,9 +225,9 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{text-align:left;p
       <div class="row2"><label>Relay reach to survivors' rescuer nodes</label><input id="pRange" type="range" min="150" max="900" step="25" value="350"><b id="pRangeV">350 m</b></div>
       <div class="row2"><label>Coverage target</label><input id="pTarget" type="range" min="50" max="100" step="5" value="90"><b id="pTargetV">90%</b></div>
       <div class="row2"><label>QAOA layers (p)</label><select id="pLayers"><option>1</option><option selected>2</option><option>3</option></select></div>
-      <button class="pri big2" id="pRun">⚛ Find how many relays are needed</button>
+      <div class="row2"><button class="pri big2" id="pRun" style="margin:0">⚛ Find relays (live, in browser)</button><button class="big2 qk" id="pQiskit" style="margin:0">Run in Qiskit Aer</button></div>
       <div class="mut sm" id="pStatus">Load sample rooftops and import survivors, or place your own.</div>
-      <div id="pAnswer"></div><div id="pOut"></div>
+      <div id="pAnswer"></div><div id="pOut"></div><div id="qkOut"></div>
       <div class="lbl2">3 · Self-healing relay test</div>
       <button id="hsRun" disabled>▶ Run self-healing on this plan</button>
       <div class="mut sm">SOS flow from the farthest survivor group through the planned relays to the command post. Click a relay on the map to destroy it and watch the route heal; click again to restore.</div>

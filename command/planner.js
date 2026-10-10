@@ -149,3 +149,22 @@ function drawSim() { const g = P.L.sim; g.clearLayers(); const N = H.N, byId = O
 
 // open the tab
 document.querySelector('#nav').addEventListener('click', e => { if (e.target.closest('[data-t="relays"]')) setTimeout(init, 40); });
+
+// ---------- the same plan in Qiskit (runs quantum/qiskit_planner.py on this laptop) ----------
+$('#pQiskit').onclick = async () => {
+  if (P.sites.length < 2 || !P.groups.length) return status('Add at least 2 candidate sites and 1 survivor group (or press Import).');
+  const body = { radius_m: +$('#pRange').value, target: +$('#pTarget').value / 100, layers: +$('#pLayers').value, sites: P.sites, groups: P.groups };
+  await fetch('/api/qiskit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  $('#pQiskit').disabled = true; const t0 = Date.now();
+  const poll = async () => { const j = await (await fetch('/api/qiskit')).json();
+    $('#qkOut').innerHTML = `<div class="qkh"><b>Qiskit Aer run</b><span class="mono" style="color:var(--mut)">${Math.round((Date.now() - t0) / 1000)} s</span></div><div class="qklog">${esc(j.log.join('\n')) || 'Building circuits…'}${j.error ? '\n\n' + esc(j.error) : ''}</div>`;
+    if (j.running) return setTimeout(poll, 1000);
+    $('#pQiskit').disabled = false;
+    if (j.result) { const a = j.result.answer, total = j.result.total;
+      P.plan = { ...(P.plan || {}), chosen: a.best_sampled, links: P.plan?.links || [], k: a.k, R: +$('#pRange').value, LR: +$('#pRange').value * 3 }; draw();
+      $('#qkOut').insertAdjacentHTML('beforeend', `<div class="ans"><b>${a.k}</b><div><div class="big">relay${a.k > 1 ? 's' : ''} needed · Qiskit ${esc(j.result.qiskit)}</div>
+        Sites ${a.best_sampled.join(', ')} cover <b>${a.people} of ${total}</b> people. ${a.people === a.optimum ? '<span class="ok">✓ brute-force optimum</span>' : ''}<br>
+        Circuit: ${j.result.qubits} qubits · depth ${a.depth} after transpile · ${Object.entries(a.ops).map(([k, v]) => `${k} ${v}`).join(' · ')} · ${a.shots} shots on AerSimulator ·
+        P(optimum) ${(a.p_optimum * 100).toFixed(1)}% vs ${(a.p_optimum_random * 100).toFixed(1)}% random · ${(a.p_valid * 100).toFixed(0)}% of shots place exactly ${a.k} relays</div></div>`);
+      $('#hsRun').disabled = false; } };
+  poll(); };
