@@ -86,6 +86,34 @@ python ai/sos_ai.py train                                  # retrain (~3 s) and 
 python ai/sos_ai.py "memu 5 mandi illu lo chikkukunnam"    # inspect one prediction
 ```
 
+## Relay planning with QAOA (dashboard tab *Relays · QAOA*)
+
+**Question:** how many relays does the rescue team need, and where should they go?
+
+**Inputs (your own, on the map):**
+- candidate relay sites, such as rooftops or water tanks (up to 10, one qubit each);
+- survivor groups: click to add, or *Import SOS + heatmap*;
+- the command post position;
+- relay reach and a coverage target (e.g. 90% of people).
+
+**How it answers:**
+1. For K = 1, 2, 3 … it builds an XY-mixer QAOA circuit. The circuit uses a Dicke start state, an RZ/RZZ cost layer from the coverage QUBO, and an RXX+RYY ring mixer, so every measured plan has exactly K relays.
+2. It **optimises the angles live** (Nelder-Mead, layer-by-layer warm start) on an exact statevector.
+3. It samples 1,024 shots and keeps the best plan.
+4. It stops at the **smallest K that meets the coverage target** and reports *"K relays needed"*.
+5. Every K is checked against brute force, and it reports whether each relay links back to the command post.
+
+The browser statevector reproduces the Qiskit Aer reference run of `quantum/qaoa_relays.py` exactly: P(optimum) is 21.08% for the 8-site, K = 3 demo map. No quantum speed-up is claimed at 8–10 sites; the formulation is what carries over to quantum hardware as maps grow.
+
+**Self-healing test on the planned relays:** SOS messages flow from the farthest survivor group through the chosen relays to the command post, using the firmware's rules:
+- HELLO beacons every 30 s; a neighbour is dropped after 3 missed beacons;
+- each node keeps a hop-count gradient toward the gateway;
+- messages only move closer to the gateway;
+- with no ACK in 2 s, it retries the next-best neighbour;
+- with no route, it stores the message and carries it until one appears.
+
+Click a relay to destroy it and watch the route re-form. Click it again to restore it.
+
 ## Run the dashboard
 
 **Requirements:** Python 3.8+ (Windows, macOS or Linux). `pyserial` is needed only when an ESP32 is connected; `start.bat` installs it.

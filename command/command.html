@@ -158,11 +158,29 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{text-align:left;p
 .dpop .leaflet-popup-content-wrapper,.dpop .leaflet-popup-tip{background:#0d1420;color:var(--fg);border:1px solid var(--line)}
 .hpop{display:grid;gap:4px;font:13px var(--f)}.hpop b{font-size:15px}.hpop div{color:var(--mut)}.hpop .ph2 a{color:#2fe08a;font-weight:700}.hpop .km{color:var(--cyan)}
 .hpin{cursor:pointer}
+#relays.on{display:block}.rp{display:grid;grid-template-columns:460px 1fr;gap:16px;height:100%;padding:16px}
+.rpl{padding:16px 18px;overflow:auto}.rpl h3{margin:0 0 4px;font-size:20px}.mut{color:var(--mut);font-size:13.5px;line-height:1.5}.sm{font-size:12px}
+.lbl2{margin:16px 0 8px;font:700 12px var(--m);letter-spacing:.1em;color:var(--cyan);text-transform:uppercase}
+.seg2{display:flex;gap:6px}.seg2 button{flex:1;padding:8px}.seg2 button.on{border-color:var(--cyan);background:rgba(67,198,255,.12)}
+.row2{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:13px}.row2 label{flex:1;color:var(--mut)}.row2 input[type=number],.row2 select{width:70px;background:var(--p2);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px}
+.row2 input[type=range]{flex:1}.row2 b{font-family:var(--m);min-width:56px;text-align:right}.row2 button{flex:1;padding:8px;font-size:13px}
+.big2{width:100%;padding:13px;font-size:16px;margin-top:10px}
+#pmap{border-radius:16px;border:1px solid var(--line);min-height:500px;height:calc(100vh - 100px)}
+.ps{position:absolute;transform:translate(-13px,-13px);width:26px;height:26px;border-radius:6px;background:#121b2b;border:2px solid #8b9ab2;color:#cfd8e3;display:grid;place-items:center;font:700 12px var(--m)}
+.ps.dead{background:#3a0d16!important;border-color:#ff3b5c!important;color:#ff3b5c!important;box-shadow:none!important;text-decoration:line-through}.ps{cursor:pointer}.ps.on{background:#a991ff;border-color:#fff;color:#0b0620;box-shadow:0 0 16px #a991ff}
+.pcp{position:absolute;transform:translate(-14px,-14px);display:flex;align-items:center;gap:6px;white-space:nowrap}.pcp b{width:28px;height:28px;border-radius:8px;background:#2fe08a;color:#04120a;display:grid;place-items:center;font-size:16px}.pcp span{font:700 12px var(--f);background:rgba(7,11,19,.9);border:1px solid #2fe08a;border-radius:6px;padding:3px 8px;color:#9ff0c5}
+.ans{display:flex;gap:16px;align-items:center;margin:14px 0;padding:14px;border-radius:14px;background:rgba(169,145,255,.1);border:1px solid var(--vio);font-size:13.5px;line-height:1.5}
+.ans>b{font:800 56px var(--m);color:var(--vio)}.ans .big{font-size:18px;font-weight:800;color:var(--fg)}
+.qt{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}.qt th,.qt td{padding:6px 5px;border-bottom:1px solid var(--line);text-align:left}.qt th{font-size:10px}.qt tr.hit td{color:var(--grn);font-weight:700}
+.qmeta{font:11px/1.5 var(--m);color:var(--mut);margin-top:8px}.conv{width:100%;margin-top:6px;background:#0b111c;border-radius:8px}
+.hss{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.hss div{background:var(--p2);border-radius:10px;padding:8px 10px;font-size:11px;color:var(--mut)}.hss b{display:block;font:700 15px var(--m);color:var(--fg);overflow-wrap:anywhere}
+.hsl{font:11px/1.6 var(--m);color:var(--mut);max-height:140px;overflow:auto;margin-top:8px}.hsl span{color:var(--dim)}
+@media (max-width:1000px){.rp{grid-template-columns:1fr}}
 </style></head><body>
 <div id="sound"><div><h2>VOID-NAV Command</h2><p>Click to start the console. This enables the alarm sound and voice alerts for critical SOS.</p><button class="pri" id="go">Start console</button></div></div>
 <header>
-  <div class="brand"><b>VOID-NAV</b><span>RESCUE COMMAND · MUSHEERABAD · v5 · 10-Oct</span></div>
-  <nav id="nav"><button data-t="inbox" class="on">SOS Inbox<span class="n" id="nUnread" hidden>0</span></button><button data-t="map">Map</button><button data-t="lab">Network lab</button></nav>
+  <div class="brand"><b>VOID-NAV</b><span>RESCUE COMMAND · MUSHEERABAD · v6 · 10-Oct</span></div>
+  <nav id="nav"><button data-t="inbox" class="on">SOS Inbox<span class="n" id="nUnread" hidden>0</span></button><button data-t="map">Map</button><button data-t="relays">Relays · QAOA</button></nav>
   <div class="sp"></div>
   <div class="link" id="link"><i></i><span id="linkTxt">LoRa link</span> <span class="tag t-emu" id="modeTag">EMULATED</span></div>
   <button id="plug" class="warn">Unplug gateway</button>
@@ -190,6 +208,31 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{text-align:left;p
     <div class="mlg"><span><i style="background:#ff3b5c"></i>High survivor density</span><span><i style="background:#ff9f1c"></i>Moderate</span><span><i style="background:#f6d04d"></i>Low</span><span><i style="border:2px solid #ff3b5c;background:none"></i>SOS received</span><span><i style="background:#2fe08a;border-radius:3px"></i>Hospital · tap for contact</span></div>
     <p>Operational area: 12 GHMC wards around Musheerabad. The heatmap ranks where rescuers should search first; each SOS is pinned at the rescuer node that relayed it.</p></div></section>
 <!-- LAB -->
+<section class="tab" id="relays">
+  <div class="rp">
+    <div class="panel rpl">
+      <h3>Relay planning · QAOA</h3>
+      <p class="mut">Where should the rescue team put its relays, and how many does it need? Place the inputs on the map, then run the quantum planner.</p>
+      <div class="lbl2">1 · Inputs (click the map)</div>
+      <div class="seg2" id="pModes"><button data-m="site" class="on">＋ Relay site</button><button data-m="group">＋ Survivors</button><button data-m="cp">⌂ Command post</button></div>
+      <div class="row2"><label>People per survivor click</label><input id="pPeople" type="number" min="1" max="50" value="5"></div>
+      <div class="row2"><button id="pSample">Load 8 sample rooftops</button><button id="pImport">Import SOS + heatmap</button><button id="pClear">Clear</button></div>
+      <div class="mut sm" id="pCounts"></div><div class="mut sm">Right-click a site or group to remove it.</div>
+      <div class="lbl2">2 · Radio</div>
+      <div class="row2"><label>Relay reach to survivors' rescuer nodes</label><input id="pRange" type="range" min="150" max="900" step="25" value="350"><b id="pRangeV">350 m</b></div>
+      <div class="row2"><label>Coverage target</label><input id="pTarget" type="range" min="50" max="100" step="5" value="90"><b id="pTargetV">90%</b></div>
+      <div class="row2"><label>QAOA layers (p)</label><select id="pLayers"><option>1</option><option selected>2</option><option>3</option></select></div>
+      <button class="pri big2" id="pRun">⚛ Find how many relays are needed</button>
+      <div class="mut sm" id="pStatus">Load sample rooftops and import survivors, or place your own.</div>
+      <div id="pAnswer"></div><div id="pOut"></div>
+      <div class="lbl2">3 · Self-healing relay test</div>
+      <button id="hsRun" disabled>▶ Run self-healing on this plan</button>
+      <div class="mut sm">SOS flow from the farthest survivor group through the planned relays to the command post. Click a relay on the map to destroy it and watch the route heal; click again to restore.</div>
+      <div class="hss" id="hsStats"></div><div class="hsl" id="hsLog"></div>
+    </div>
+    <div id="pmap"></div>
+  </div>
+</section>
 <section class="tab" id="lab">
   <div class="panel"><div class="lab-h"><h3>Pillar 1 · Semantic compression</h3><p>Send the meaning, not the words. SemCode 40-bit token, Semtech SX127x airtime at SF9 / 125 kHz / CR 4/5. Uses the latest SOS.</p></div>
     <div class="big3"><div><b id="mSave">−70%</b><span>airtime per SOS</span></div><div><b id="mBytes">102→15</b><span>bytes on air</span></div><div><b id="mCap">3.4×</b><span>more SOS per channel-hour</span></div></div>
@@ -212,4 +255,5 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{text-align:left;p
 <div id="toasts"></div>
 <div id="scm" hidden><div class="scw panel"><div class="sch"><b>⚡ Semantic compression · this SOS, real numbers</b><button id="scClose">Close</button></div><div id="scBody"></div></div></div>
 <script type="module" src="command.js"></script>
+<script type="module" src="planner.js"></script>
 </body></html>

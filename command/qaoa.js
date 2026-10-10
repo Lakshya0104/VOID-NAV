@@ -65,3 +65,37 @@ export function stats(P, prob, shots = 8192, seed = 7) {
   let randExp = 0; for (let b = 0; b < N; b++) if (pop(b) === k) randExp += pplOf[b]; randExp /= combos;
   return { pOpt, pValid, expRatio: exp / bestP, randRatio: randExp / bestP, pRandValid: nOpt / combos, pRandGuess: nOpt / N, top, mostFrequent: P.chosenOf(top[0][0]), shots };
 }
+
+// ---------------------------------------------------------------- live optimisation (no stored angles)
+// Classical outer loop of QAOA: Nelder-Mead over (gammas, betas) minimising the negative expected
+// coverage of the measured state. p=1 grid warm start, then p=2 initialised by interpolation.
+function nelderMead(f, x0, step = 0.3, iters = 160) {
+  const n = x0.length; let S = [x0.slice()]; for (let i = 0; i < n; i++) { const x = x0.slice(); x[i] += step; S.push(x); }
+  let F = S.map(f);
+  for (let it = 0; it < iters; it++) {
+    const idx = F.map((v, i) => i).sort((a, b) => F[a] - F[b]); S = idx.map(i => S[i]); F = idx.map(i => F[i]);
+    const c = Array(n).fill(0); for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) c[j] += S[i][j] / n;
+    const pt = (a) => c.map((v, j) => v + a * (S[n][j] - v));
+    const r = pt(-1), fr = f(r);
+    if (fr < F[0]) { const e = pt(-2), fe = f(e); if (fe < fr) { S[n] = e; F[n] = fe; } else { S[n] = r; F[n] = fr; } }
+    else if (fr < F[n - 1]) { S[n] = r; F[n] = fr; }
+    else { const k = pt(.5), fk = f(k); if (fk < F[n]) { S[n] = k; F[n] = fk; } else { for (let i = 1; i <= n; i++) { S[i] = S[i].map((v, j) => S[0][j] + .5 * (v - S[0][j])); F[i] = f(S[i]); } } }
+    if (Math.abs(F[n] - F[0]) < 1e-7) break;
+  }
+  const b = F.indexOf(Math.min(...F)); return { x: S[b], f: F[b] };
+}
+export function optimise(P, p = 3, onIter, restarts = 4) {
+  const { N, pplOf, bestP } = P; let evals = 0, bestSeen = 0;
+  const expc = (g, b) => { const pr = run(P, g, b); let e = 0; for (let i = 0; i < N; i++) e += pr[i] * pplOf[i]; evals++; const r = e / Math.max(1, bestP); if (r > bestSeen) bestSeen = r; if (onIter) onIter(evals, r, bestSeen); return r; };
+  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let prev = null, res = null;
+  for (let layer = 1; layer <= p; layer++) {
+    const starts = [];
+    if (prev) { const ip = a => Array.from({ length: layer }, (_, i) => { const x = i * (a.length - 1) / Math.max(1, layer - 1), lo = Math.floor(x), hi = Math.min(a.length - 1, lo + 1); return a[lo] + (a[hi] - a[lo]) * (x - lo); }); starts.push([...ip(prev.slice(0, layer - 1)), ...ip(prev.slice(layer - 1))]); }
+    for (let r = 0; r < (layer === 1 ? restarts * 2 : restarts); r++) starts.push([...Array(layer)].map(() => rnd() * Math.PI).concat([...Array(layer)].map(() => rnd() * Math.PI / 2)));
+    let best = null;
+    for (const s of starts) { const o = nelderMead(th => -expc(th.slice(0, layer), th.slice(layer)), s, .25, 90 + 50 * layer); if (!best || o.f < best.f) best = o; }
+    prev = best.x; res = best;
+  }
+  return { gammas: prev.slice(0, p), betas: prev.slice(p), evals, expRatio: -res.f };
+}
